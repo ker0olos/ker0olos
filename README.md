@@ -1,3 +1,2 @@
-### Hi there, just wanted to tell you that I use arch(-esque) btw.
-
-![](https://github.com/ItsKerolos/ItsKerolos/raw/master//2020-07-22-174537_1366x768_scrot.png)
+![A Screenshot of a Linux Desktop](https://github.com/ItsKerolos/ItsKerolos/raw/master//2020-07-22-174537_1366x768_scrot.png)
+###### *(No, I won't share my dotfiles with you)*
