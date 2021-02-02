@@ -1,3 +1,7 @@
+<p align="center">
+  <a href="https://www.upwork.com/freelancers/~0154713a070c8d3b1f"><i>Hire Me.</i></a>
+</p>
+ 
 ![A Screenshot of a Linux Desktop](https://github.com/ItsKerolos/ItsKerolos/raw/master/2020-10-08-095454_1366x768_scrot.png)
 
 <h6 align="center"><i>(Send dots.)</i></h6>
