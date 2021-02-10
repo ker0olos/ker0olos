@@ -2,6 +2,7 @@
 
 <h6 align="center"><i>(Send dots.)</i></h6>
 
+</br>
 <p align="center">
   <img src="https://github.com/ItsKerolos/ItsKerolos/raw/master/chat-view.gif" alt="Abram's Chat View"></img>
   <img src="https://github.com/ItsKerolos/ItsKerolos/raw/master/profile-view.gif" alt="Abram's Profile View"></img>
