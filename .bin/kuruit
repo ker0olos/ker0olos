@@ -1,0 +1,62 @@
+#!/usr/bin/node
+
+const { exec } = require('child_process');
+
+/**
+* @param { string } black
+* @param { string[] } white
+*/
+function get(black, white)
+{
+  const b64 = (str) =>
+  {
+    str = encodeURIComponent(str).replace(/%([0-9A-F]{2})/g,
+      (match, p1) =>
+      {
+        return String.fromCharCode('0x' + p1);
+      });
+    
+    return Buffer.from(str, 'binary').toString('base64');
+  };
+
+  const obj = { black, white };
+
+  const data = b64(JSON.stringify(obj)).replace('/', '_').replace('+', '-');
+
+  // const endpoint = 'http://localhost:3000';
+  const endpoint = 'https://api.airtegal.me';
+
+  return {
+    shareURL: `${endpoint}/share/${data}`,
+    pictureURL: `${endpoint}/picture/${data}.png`
+  }
+}
+
+// console.log(process.argv);
+
+/**
+* @type { 'view' | 'download' }
+*/
+const type = process.argv[2];
+
+const [ black, white ]  = [ process.argv[3], process.argv.slice(4) ];
+
+// console.log('black', black);
+// console.log('white', white);
+
+if (type === 'view')
+{
+  const { shareURL } = get(black, white);
+
+  console.log('Opening In Browser...');
+
+  exec(`xdg-open ${shareURL}`);
+}
+else if (type === 'download')
+{
+  const { pictureURL } = get(black, white);
+
+  console.log('Opening In Browser...');
+
+  exec(`xdg-open ${pictureURL}`);
+}

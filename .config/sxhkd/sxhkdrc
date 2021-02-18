@@ -1,0 +1,131 @@
+######################
+### Launching Apps ###
+######################
+
+# Terminal
+super + Return
+  alacritty
+
+# Dmenu
+alt + p
+  dmenu_run
+
+# Keyboard Launcher
+super + F1
+  launcher.sh
+
+# Keyboard Launcher
+super + n
+  notif-center.sh
+  
+####################
+###  BSP CLient  ###
+####################
+
+# Send the window to a given workspace
+super + {1-9}
+  bspc node -d '^{1-9}'
+
+# Switch between windows in current workspace
+ctrl + alt + Tab
+  bspc node -f next.local
+
+alt + Tab
+  bspc node -f next.local
+
+super + {Left,Down,Up,Right}
+  bspc node -s {west,south,north,east}
+
+# Rotate desktop
+super + r
+  bspc node @/ -R 90
+
+# Scroll through occupied workspaces
+super + {s,w}
+  bspc desktop -f {prev,next}.occupied
+
+# Switch window between tiled and fullscreen
+super + f
+  if [ -z "$(bspc query -N -n .local.fullscreen)" ]; then \
+    bspc node -t fullscreen; \
+  else \
+    bspc node -t tiled; \
+  fi
+
+# Switch window between pseudo_tiled and tiled
+super + t
+  if [ -z "$(bspc query -N -n .local.focused.pseudo_tiled)" ]; then \
+    bspc node -t pseudo_tiled; \
+  else \
+    bspc node -t tiled; \
+  fi
+
+# (Un)hide window
+super + h
+  if [ -z "$(bspc query -N -n .local.hidden)" ]; then \
+    bspc node -g hidden; \
+  else \
+    bspc node $(bspc query -N -n .local.hidden | tail -n1) -g hidden=off; \
+  fi
+
+# Close window
+super + x
+  bspc node -c
+
+# Close window
+super + x
+  bspc node -c
+
+# Kill window
+super + alt + x
+  bspc node -k
+
+# Quit bspwm
+alt + shift + q
+  bspc quit
+
+########################
+###  Screenshot-ing  ###
+########################
+
+@Print
+  screenshot-select.sh
+
+shift + @Print
+  screenshot-full.sh
+
+################
+###  System  ###
+################
+
+# Reload sxhkd
+super + Escape
+  pkill -USR1 -x sxhkd && \
+  bar.sh && \
+  dunstify -r 500 "SXHKD and Polybar" "<b>Reloaded</b>"
+
+# Switch keyboard layout
+super + space
+  keyboard.sh
+
+####################
+###  Media Keys  ###
+####################
+
+super + p
+  playerctl play-pause
+
+XF86AudioRaiseVolume
+  volume.sh up
+
+XF86AudioLowerVolume
+  volume.sh down
+
+XF86AudioMute
+  volume.sh mute
+	
+XF86MonBrightnessUp
+  light.sh up
+
+XF86MonBrightnessDown
+  light.sh down

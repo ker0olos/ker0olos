@@ -1,0 +1,176 @@
+[colors]
+background = #99000000
+foreground = #cfcfcf
+
+[settings]
+compositing-foreground = source
+
+[options]
+height = 32
+
+[bar/date]
+width = 10%
+height = ${options.height}
+
+offset-x = 8
+offset-y = 8
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+font-0 = Hack Nerd Font:size=8;3
+
+modules-center = date
+
+wm-restack = bspwm
+
+[bar/media]
+width = 28%
+height = ${options.height}
+
+offset-x = 15%:+14
+offset-y = 8
+
+# Spotify
+# background = #9921bf58
+
+background = #99000000
+foreground = #FFFFFF
+
+font-0 = Montserrat:size=9:style=bold;3
+font-1 = Noto Sans Arabic:size=9:style=bold;2
+font-2 = Material Design Icons Desktop:size=13;3
+font-3 = fontello:size=9;3
+
+modules-left = mpris_title
+modules-right = mpris_icon
+
+padding = 7
+
+click-left = playerctl play-pause --player=chrome &
+double-click-left = playerctl next --player=chrome &
+
+wm-restack = bspwm
+
+[bar/stats]
+width = 14%
+height = ${options.height}
+
+offset-x = 86%:-8
+offset-y = 8
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+font-0 = Hack Nerd Font:size=8;3
+
+modules-center = speed_1 speed_2 cpu
+
+module-margin = 1
+
+wm-restack = bspwm
+
+[bar/system]
+width = 7.5%
+height = ${options.height}
+
+offset-x = 78.5%:-16
+offset-y = 8
+
+background = ${colors.background}
+foreground = ${colors.foreground}
+
+font-0 = Hack Nerd Font:size=8;3
+font-1 = Material Design Icons Desktop:size=13;4
+font-2 = Material Design Icons Desktop:size=13;4
+
+modules-center = pulseaudio kdeconnect 
+
+module-margin = 1
+
+wm-restack = bspwm
+
+[bar/tray]
+width = 20
+height = ${options.height}
+
+offset-x = 78%:-44
+offset-y = 8
+
+background = #00000000
+foreground = ${colors.foreground}
+
+modules-center = empty
+
+tray-position = right
+tray-background = ${colors.background}
+;tray-detached = false
+tray-padding = 14
+
+[module/pulseaudio]
+type = internal/pulseaudio
+
+interval = 5
+
+format-volume = <ramp-volume>
+
+label-muted = 󰖁
+label-muted-foreground = #ffd200
+
+ramp-volume-0 = 󰕿
+ramp-volume-1 = 󰖀
+ramp-volume-2 = 󰕾
+
+[module/speed_1]
+type = internal/network
+interface = enp8s0
+
+interval = 1
+
+format-connected = <label-connected>
+label-connected = %downspeed%
+
+[module/speed_2]
+type = internal/network
+interface = wlp9s0
+
+interval = 1
+
+format-connected = <label-connected>
+label-connected = %downspeed%
+
+[module/cpu]
+type = custom/script
+
+interval = 1
+exec = cpu-speed.sh
+
+[module/mpris_title]
+type = custom/script
+
+interval = 0.25
+exec = mpris-bets title
+
+[module/mpris_icon]
+type = custom/script
+
+interval = 0.25
+exec = mpris-bets icon
+
+[module/kdeconnect]
+type = custom/script
+
+interval = 1
+exec = /home/ker0olos/.config/polybar/modules/kdeconnect.sh -d
+
+[module/empty]
+type = custom/text
+content = " "
+
+[module/date]
+type = internal/date
+interval = 30
+
+label = %time%
+time = %a, %I:%M %p
+time-alt = %d %b, %Y
