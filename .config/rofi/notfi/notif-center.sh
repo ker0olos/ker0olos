@@ -104,7 +104,7 @@ separation=$(sed '0~3 s/$/\x0f/g' <(echo -en "$amend"))
 final_rofi=$(sed ':a;/\x0f$/{N;s/\n//;ba}'   <(echo -n "$separation"))
 
 ### Eventual Final command to be executed
-selection=$(echo -ne "$final_rofi" | rofi -markup-rows -theme ~/.config/rofi/notfi/styles/Nord.rasi -dmenu -eh 3 -a "$active_list" -u "$urgent_list" -sep '\x0f' -p "Notification Center" -no-fixed-num-lines -lines 12 -i -no-config)
+selection=$(echo -ne "$final_rofi" | rofi -markup-rows -theme ~/.config/rofi/notfi/style.rasi -dmenu -eh 3 -a "$active_list" -u "$urgent_list" -sep '\x0f' -p "Notification Center" -no-fixed-num-lines -lines 12 -i -no-config)
 
 ### If a notification was selected, delete it from the logs
 if [ -n "$selection" ]; then
@@ -114,5 +114,6 @@ if [ -n "$selection" ]; then
     add_timestamp="$remove_whitespace\n$extract_date\n"
     reverse_search=$(tac <(echo -ne "$add_timestamp") | sed -E ':a;N;$!ba;s/\r{0,1}\n/\\n/g')
 
-    ~/.config/rofi/notfi/clear.js /tmp/dunstlog "$reverse_search" 
+    ~/.config/rofi/notfi/clear.py "$reverse_search" 
+    # ~/.config/rofi/notfi/clear.js "$reverse_search" 
 fi
