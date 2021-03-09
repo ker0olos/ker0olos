@@ -55,6 +55,8 @@ wall.sh &
 pamac-tray &
 # network manager tray
 nm-applet &
+# start sptctl service
+sptctl-service &
 # authentication agent
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon 

@@ -2,6 +2,9 @@
 background = #99000000
 foreground = #cfcfcf
 
+spotify_background = #9921bf58
+spotify_foreground = #FFFFFF
+
 [settings]
 compositing-foreground = source
 
@@ -24,31 +27,43 @@ modules-center = date
 
 wm-restack = bspwm
 
-[bar/media]
+[bar/spotify]
 width = 28%
 height = ${options.height}
 
 offset-x = 15%:+14
 offset-y = 8
 
-# Spotify
-# background = #9921bf58
-
-background = #99000000
-foreground = #FFFFFF
+background = ${colors.spotify_background}
+foreground = ${colors.spotify_foreground}
 
 font-0 = Montserrat:size=9:style=bold;3
-font-1 = Noto Sans Arabic:size=9:style=bold;2
-font-2 = Material Design Icons Desktop:size=13;3
-font-3 = fontello:size=9;3
+font-1 = Noto Sans Arabic:size=9:style=bold;3
+font-2 = Material Design Icons Desktop:size=13;4
 
-modules-left = mpris_title
-modules-right = mpris_icon
+modules-left = title
+modules-right = like icon
 
 padding = 7
 
-click-left = playerctl play-pause --player=chrome &
-double-click-left = playerctl next --player=chrome &
+click-left = sptctl play-pause &
+double-click-left = sptctl next &
+
+wm-restack = bspwm
+
+[bar/spotify2]
+width = 28%
+height = 3
+
+offset-x = 15%:+14
+offset-y = 8
+
+background = "#00000000"
+foreground = ${colors.spotify_foreground}
+
+font-0 = Montserrat:size=9:style=bold;-2
+
+modules-left = progress
 
 wm-restack = bspwm
 
@@ -138,30 +153,41 @@ interval = 1
 
 format-connected = <label-connected>
 label-connected = %downspeed%
-
 [module/cpu]
 type = custom/script
 
 interval = 1
 exec = cpu-speed.sh
 
-[module/mpris_title]
-type = custom/script
-
-interval = 0.25
-exec = mpris-bets title
-
-[module/mpris_icon]
-type = custom/script
-
-interval = 0.25
-exec = mpris-bets icon
-
 [module/kdeconnect]
 type = custom/script
 
-interval = 1
+interval = 0.25
 exec = /home/ker0olos/.config/polybar/modules/kdeconnect.sh -d
+
+[module/title]
+type = custom/script
+
+interval = 0.5
+exec = echo $(ara.sh "$(sptctl title)")
+
+[module/icon]
+type = custom/text
+content = "󰓇"
+
+[module/like]
+type = custom/script
+
+interval = 0.25
+exec = echo "$(like.sh)  "
+
+click-left = sptctl like &
+
+[module/progress]
+type = custom/script
+
+interval = 0.25
+exec = progress.sh
 
 [module/empty]
 type = custom/text
