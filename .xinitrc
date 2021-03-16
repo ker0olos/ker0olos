@@ -43,6 +43,8 @@ xsetroot -cursor_name left_ptr &
 xcape -e 'Super_L=Super_L|F1' &
 # keybindings
 exec sxhkd &
+# dual monitor detection and setup
+dual_monitor
 # polybar
 bar.sh &
 # compositor
@@ -61,7 +63,5 @@ sptctl-service &
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon 
 dunst &
-# dual monitor detection and setup
-dual_monitor &
 # window manager
 exec bspwm
