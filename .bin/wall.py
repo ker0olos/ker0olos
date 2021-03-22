@@ -155,6 +155,11 @@ for post in posts:
     print('  Skipping: not enough up votes')
     index += 1
     continue
+
+  if post['data']['link_flair_text'] and post['data']['link_flair_text'] != 'Desktop':
+    print('  Skipping: flair is not for landscape')
+    index += 1
+    continue
   
   # Shortening variable name
   post = post['data']['url']
