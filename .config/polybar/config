@@ -68,18 +68,19 @@ modules-left = progress
 wm-restack = bspwm
 
 [bar/stats]
-width = 14%
+width = 15%
 height = ${options.height}
 
-offset-x = 86%:-8
+offset-x = 85%:-8
 offset-y = 8
 
 background = ${colors.background}
 foreground = ${colors.foreground}
 
 font-0 = Hack Nerd Font:size=8;3
+font-1 = Material Design Icons Desktop:size=8;4
 
-modules-center = speed_1 speed_2 cpu
+modules-center = speed_1 speed_2 cpu battery
 
 module-margin = 1
 
@@ -89,7 +90,7 @@ wm-restack = bspwm
 width = 7.5%
 height = ${options.height}
 
-offset-x = 78.5%:-16
+offset-x = 77.5%:-16
 offset-y = 8
 
 background = ${colors.background}
@@ -109,17 +110,15 @@ wm-restack = bspwm
 width = 20
 height = ${options.height}
 
-offset-x = 78%:-44
+offset-x = 77.5%:-44
 offset-y = 8
 
 background = #00000000
-foreground = ${colors.foreground}
 
 modules-center = empty
 
 tray-position = right
 tray-background = ${colors.background}
-;tray-detached = false
 tray-padding = 14
 
 [module/pulseaudio]
@@ -153,6 +152,7 @@ interval = 1
 
 format-connected = <label-connected>
 label-connected = %downspeed%
+
 [module/cpu]
 type = custom/script
 
@@ -200,3 +200,16 @@ interval = 30
 label = %time%
 time = %a, %I:%M %p
 time-alt = %d %b, %Y
+
+[module/battery]
+type = internal/battery
+
+battery = BAT0
+adapter = ADP0
+
+full-at = 99
+
+label-charging = %percentage%% 󰉁
+label-discharging = %percentage%%
+
+poll-interval = 5
