@@ -2,9 +2,6 @@
 background = #99000000
 foreground = #cfcfcf
 
-spotify_background = #9921bf58
-spotify_foreground = #FFFFFF
-
 [settings]
 compositing-foreground = source
 
@@ -34,8 +31,8 @@ height = ${options.height}
 offset-x = 15%:+14
 offset-y = 8
 
-background = ${colors.spotify_background}
-foreground = ${colors.spotify_foreground}
+background = #9921bf58
+foreground = #FFFFFF
 
 font-0 = Montserrat:size=9:style=bold;3
 font-1 = Noto Sans Arabic:size=9:style=bold;3
@@ -46,24 +43,8 @@ modules-right = like icon
 
 padding = 7
 
-click-left = sptctl play-pause &
-double-click-left = sptctl next &
-
-wm-restack = bspwm
-
-[bar/spotify2]
-width = 28%
-height = 3
-
-offset-x = 15%:+14
-offset-y = 8
-
-background = "#00000000"
-foreground = ${colors.spotify_foreground}
-
-font-0 = Montserrat:size=9:style=bold;-2
-
-modules-left = progress
+click-left = spt.py toggle &
+double-click-left = spt.py skip &
 
 wm-restack = bspwm
 
@@ -168,26 +149,20 @@ exec = /home/ker0olos/.config/polybar/modules/kdeconnect.sh -d
 [module/title]
 type = custom/script
 
-interval = 0.5
-exec = echo $(ara.sh "$(sptctl title)")
+interval = 3.5
+exec = echo $(ara.sh "$(spt.py title)")
 
 [module/icon]
 type = custom/text
-content = "󰓇"
+content = " 󰓇"
 
 [module/like]
 type = custom/script
 
-interval = 0.25
-exec = echo "$(like.sh)  "
+interval = 1.5
+exec = spt.py state
 
-click-left = sptctl like &
-
-[module/progress]
-type = custom/script
-
-interval = 0.25
-exec = progress.sh
+click-left = spt.py like &
 
 [module/empty]
 type = custom/text

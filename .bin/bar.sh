@@ -11,3 +11,4 @@ polybar date &
 polybar system &
 polybar stats &
 polybar tray &
+polybar spotify &

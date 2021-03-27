@@ -43,22 +43,18 @@ xsetroot -cursor_name left_ptr &
 xcape -e 'Super_L=Super_L|F1' &
 # keybindings
 exec sxhkd &
-# dual monitor detection and setup
-dual_monitor
-# polybar
-bar.sh &
 # compositor
 picom --experimental-backends --backend glx -b &
 # redlight
 redshift &
-# set default wallpaper
-wall.sh &
 # pamac update notifier tray
 pamac-tray &
 # network manager tray
 nm-applet &
-# start sptctl service
-sptctl-service &
+# battery level notifications
+batsignal -b -w 20 -c 10 -d 5 -f 99 &
+# start spotifyd service
+spotifyd &
 # authentication agent
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon 

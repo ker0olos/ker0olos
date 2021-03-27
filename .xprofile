@@ -9,6 +9,7 @@ export XDG_CONFIG_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_CONFIG_HOME="$HOME/.config"
 
+export $(secrets)
 export $(dbus-launch)
 
 export QT_QPA_PLATFORMTHEME=gtk3

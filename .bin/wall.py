@@ -16,7 +16,7 @@ subreddit = 'wallpapers'
 min_width = 1366
 min_height = 768
 # How many posts to get for each request (Max 100)
-limit = 50
+limit = 100
 
 # ---------------------
 # IMPORTS -------------
