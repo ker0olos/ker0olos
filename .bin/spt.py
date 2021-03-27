@@ -2,7 +2,7 @@
 
 import os
 import sys
-from pprint import pprint
+import http.client as httplib
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -13,10 +13,20 @@ if len(sys.argv) > 1:
 else:
   sys.exit()
 
+connection = httplib.HTTPConnection('api.spotify.com', timeout=1)
+
+try:
+  connection.request('HEAD', '/')
+  connection.close()
+except:
+  print('No internet connection.') if command=='title' else print('')
+  connection.close()
+  sys.exit()
+
 spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=os.environ['SPOTIFY_CLIENT_ID'],
                                                client_secret=os.environ['SPOTIFY_CLIENT_SECRET'],
                                                redirect_uri='http://localhost:8888/callback',
-                                               cache_path='./.spotify_cache',
+                                               cache_path=os.environ['HOME'] + '/.spotify_cache',
                                                scope='user-read-playback-state,user-modify-playback-state,user-library-read,user-library-modify,user-read-recently-played'))
 
 active=True
@@ -45,7 +55,7 @@ elif (command=='toggle'):
       sys.exit()
     # last streamed 40 tracks
     uris=map(lambda item: item['track']['uri'], spotify.current_user_recently_played(limit=40)['items'])
-    spotify.start_playback(device_id=devices[0]['id'],uris=list(uris))
+    spotify.start_playback(device_id=devices[0]['id'],uris=list(dict.fromkeys(uris)))
   else:
     spotify.start_playback()
 elif (command=='skip'):
