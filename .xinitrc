@@ -53,8 +53,6 @@ pamac-tray &
 nm-applet &
 # battery level notifications
 batsignal -b -w 20 -c 10 -d 5 -f 99 &
-# start spotifyd service
-spotifyd &
 # authentication agent
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon 

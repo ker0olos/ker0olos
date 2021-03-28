@@ -2,6 +2,9 @@
 
 import os
 import sys
+import time
+import subprocess
+
 import http.client as httplib
 
 import spotipy
@@ -50,9 +53,17 @@ elif (command=='toggle'):
     spotify.pause_playback()
   elif not active:
     devices=spotify.devices()['devices']
+
+    # try spawning spotifyd if there's working devices
+    if (len(devices) == 0):
+      subprocess.Popen(['spotifyd'])
+      time.sleep(1)
+      devices=spotify.devices()['devices']
+      
     if (len(devices) == 0):
       print('No devices available.')
       sys.exit()
+
     # last streamed 40 tracks
     uris=map(lambda item: item['track']['uri'], spotify.current_user_recently_played(limit=40)['items'])
     spotify.start_playback(device_id=devices[0]['id'],uris=list(dict.fromkeys(uris)))
