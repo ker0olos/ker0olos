@@ -3,7 +3,7 @@
 import os
 import sys
 import time
-import random
+import datetime
 import subprocess
 
 import http.client as httplib
@@ -35,11 +35,26 @@ spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=os.environ['SPOTIF
 
 currently_playing=spotify.currently_playing()
 
+# my favorite playlists
+# https://open.spotify.com/genre/made-for-x-hub
+playlists = [
+  'spotify:playlist:37i9dQZF1E39KFXWlmzgOy', 
+  'spotify:playlist:37i9dQZF1DWV4t1PmvRVd9',
+  'spotify:playlist:37i9dQZF1E36Hq1lYk3e5n',
+  'spotify:playlist:37i9dQZF1E35tuHOcRhgZZ',
+  'spotify:playlist:37i9dQZF1E39jZuNJB5bh7',
+  'spotify:playlist:37i9dQZF1E35TMnPZZpmYQ',
+  'spotify:playlist:37i9dQZF1E3855z4z5OsPs',
+  'spotify:playlist:37i9dQZF1DWUQM3rmTXpBR',
+]
+
 # nothing is playing
-# output info about last recently played track
 if (not currently_playing):
+  id = round(int(datetime.datetime.utcnow().strftime('%S')) / (len(playlists)))
+
   if (command=='title'):
-    print('Nothing is queued.')
+    # print('Nothing is queued.')
+    print('It\'s time for ' + spotify.playlist(playlists[id])['name'])
     # print(spotify.current_user_recently_played(limit=1)['items'][0]['track']['name'])
   elif (command=='toggle'):
     devices=spotify.devices()['devices']
@@ -51,25 +66,15 @@ if (not currently_playing):
       devices=spotify.devices()['devices']
       
     if (len(devices) == 0):
-      print('No devices available.')
+      print('No active devices found.')
       sys.exit()
 
-    # my favorite playlists
-    uris=map(lambda item: item['track']['uri'], spotify.playlist_items(random.choice([
-      'spotify:playlist:37i9dQZF1E35tuHOcRhgZZ',
-      'spotify:playlist:37i9dQZF1E3855z4z5OsPs',
-      'spotify:playlist:37i9dQZF1E39jZuNJB5bh7',
-      'spotify:playlist:37i9dQZF1E36Hq1lYk3e5n',
-      'spotify:playlist:37i9dQZF1E39KFXWlmzgOy', 
-      'spotify:playlist:37i9dQZF1E35TMnPZZpmYQ',
-      'spotify:playlist:37i9dQZF1DWV4t1PmvRVd9',
-      'spotify:playlist:37i9dQZF1DWUQM3rmTXpBR'
-    ]))['items']) # https://open.spotify.com/genre/made-for-x-hub
-    
-    # get last streamed 40 tracks (little buggy for whatever fucking reason, I don't care anymore.)
-    # uris=dict.fromkeys(map(lambda item: item['track']['uri'], spotify.current_user_recently_played(limit=40)['items']))
+    spotify.start_playback(device_id=devices[0]['id'],context_uri=playlists[id])
 
-    spotify.start_playback(device_id=devices[0]['id'],uris=list(uris))
+    # get last streamed 40 tracks (little buggy for whatever fucking reason, I don't care anymore.)
+    # uris=map(lambda item: item['track']['uri'], spotify.current_user_recently_played(limit=40)['items'])
+
+    # spotify.start_playback(device_id=devices[0]['id'],uris=list(dict.fromkeys(uris)))
 
     # this is my personal preference
     spotify.shuffle(True)
