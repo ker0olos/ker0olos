@@ -149,7 +149,7 @@ exec = /home/ker0olos/.config/polybar/modules/kdeconnect.sh -d
 [module/title]
 type = custom/script
 
-interval = 3.5
+interval = 2
 exec = echo $(ara.sh "$(spt.py title)")
 
 [module/icon]
@@ -159,7 +159,7 @@ content = " 󰓇"
 [module/like]
 type = custom/script
 
-interval = 1.5
+interval = 1
 exec = spt.py state
 
 click-left = spt.py like &

@@ -5,6 +5,7 @@ import sys
 import time
 import datetime
 import subprocess
+import math
 
 import http.client as httplib
 
@@ -38,19 +39,20 @@ currently_playing=spotify.currently_playing()
 # my favorite playlists
 # https://open.spotify.com/genre/made-for-x-hub
 playlists = [
-  'spotify:playlist:37i9dQZF1E39KFXWlmzgOy', 
-  'spotify:playlist:37i9dQZF1DWV4t1PmvRVd9',
-  'spotify:playlist:37i9dQZF1E36Hq1lYk3e5n',
-  'spotify:playlist:37i9dQZF1E35tuHOcRhgZZ',
-  'spotify:playlist:37i9dQZF1E39jZuNJB5bh7',
-  'spotify:playlist:37i9dQZF1E35TMnPZZpmYQ',
-  'spotify:playlist:37i9dQZF1E3855z4z5OsPs',
-  'spotify:playlist:37i9dQZF1DWUQM3rmTXpBR',
+  'spotify:playlist:37i9dQZF1E35tuHOcRhgZZ', # Daily Mix 1
+  'spotify:playlist:37i9dQZF1E3855z4z5OsPs', # Daily Mix 2
+  'spotify:playlist:37i9dQZF1E39jZuNJB5bh7', # Daily Mix 3
+  'spotify:playlist:37i9dQZF1E36Hq1lYk3e5n', # Daily Mix 4
+  # 'spotify:playlist:37i9dQZF1E39KFXWlmzgOy',# Daily Mix 5
+  # 'spotify:playlist:37i9dQZF1E35TMnPZZpmYQ', # Daily Mix 6
+  'spotify:playlist:37i9dQZF1DWV4t1PmvRVd9', # Egyptian Indie
+  # 'spotify:playlist:37i9dQZF1DWUQM3rmTXpBR', # Arab Indie
+  'spotify:playlist:37i9dQZEVXbsA9iS8lxmLk' # Release Radar
 ]
 
 # nothing is playing
 if (not currently_playing):
-  id = round(int(datetime.datetime.utcnow().strftime('%S')) / (len(playlists)))
+  id = math.ceil(int(datetime.datetime.utcnow().strftime('%S')) / 10) - 1
 
   if (command=='title'):
     # print('Nothing is queued.')
