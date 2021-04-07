@@ -41,6 +41,8 @@ xsetroot -cursor_name left_ptr &
 
 # map super keys to trigger when used alone
 xcape -e 'Super_L=Super_L|F1' &
+# enable natural scrolling on the touchpad
+xinput set-prop "AlpsPS/2 ALPS GlidePoint" "libinput Natural Scrolling Enabled" 1
 # keybindings
 exec sxhkd &
 # compositor
