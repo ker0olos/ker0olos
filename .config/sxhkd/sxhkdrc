@@ -6,10 +6,6 @@
 super + Return
   alacritty
 
-# Dmenu
-alt + p
-  dmenu_run
-
 # Keyboard Launcher
 super + F1
   launcher.sh
@@ -28,9 +24,6 @@ super + {1-9}
 
 # Switch between windows in current workspace
 ctrl + alt + Tab
-  bspc node -f next.local
-
-alt + Tab
   bspc node -f next.local
 
 super + {Left,Down,Up,Right}
@@ -72,14 +65,6 @@ super + h
 super + x
   bspc node -c
 
-# Close window
-super + x
-  bspc node -c
-
-# Kill window
-super + alt + x
-  bspc node -k
-
 # Quit bspwm
 alt + shift + q
   bspc quit
@@ -101,8 +86,7 @@ shift + @Print
 # Reload sxhkd
 super + Escape
   pkill -USR1 -x sxhkd && \
-  bar.sh && \
-  dunstify -r 500 "SXHKD and Polybar" "<b>Reloaded</b>"
+  dunstify -r 500 "SXHKD" "<b>Reloaded</b>"
 
 # Switch keyboard layout
 super + space
@@ -129,3 +113,13 @@ XF86MonBrightnessUp
 
 XF86MonBrightnessDown
   light.sh down
+
+####################
+###  Equalizer  ###
+####################
+
+super + shift + 0
+  pulseeffects -l Normal
+
+super + shift + 5
+  pulseeffects -l La
