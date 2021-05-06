@@ -75,3 +75,6 @@ colors:
     white:   '0xe6e6d1'
 
   indexed_colors: []
+
+key_bindings:
+  - { key: Back, mods: Control, chars: "\x1b\x7f" }

@@ -118,8 +118,17 @@ XF86MonBrightnessDown
 ###  Equalizer  ###
 ####################
 
-super + shift + 0
+super + shift + 1
   pulseeffects -l Normal
 
-super + shift + 5
+super + shift + 2
   pulseeffects -l La
+
+super + shift + 3
+  pulseeffects -l Phone
+
+super + shift + 4
+  pulseeffects -l Far
+
+super + shift + 5
+  pulseeffects -l Echo
