@@ -164,9 +164,9 @@ for post in posts:
   # Shortening variable name
   post = post['data']['url']
 
-  # Skip post on 404 error
-  if not validURL(post):
-    print('  Skipping: invalid url')
+  # Skip already downloaded images
+  if alreadyDownloaded(post):
+    print('  Skipping: already used image')
     index += 1
     continue
 
@@ -182,9 +182,9 @@ for post in posts:
     index += 1
     continue
 
-  # Skip already downloaded images
-  elif alreadyDownloaded(post):
-    print('  Skipping: already used image')
+  # Skip post on 404 error
+  elif not validURL(post):
+    print('  Skipping: invalid url')
     index += 1
     continue
 
