@@ -11,12 +11,16 @@
 directory = '~/Pictures/Wall/'
 # default subreddit to download from
 subreddit = 'wallpapers'
+# search query
+query = ''
 # min_width = 1920
 # min_height = 1080
 min_width = 1366
 min_height = 768
-# How many posts to get for each request (Max 100)
+# How many posts to get for each request (max=100)
 limit = 100
+# Increase this number if the number above limit is not enough posts
+loops = 5
 
 # ---------------------
 # IMPORTS -------------
@@ -29,9 +33,6 @@ import urllib
 import subprocess
 from PIL import ImageFile
 
-# ---------------------
-# FUNCTIONS -----------
-# ---------------------
 
 # Returns false on status code error
 def validURL(URL):
@@ -51,16 +52,26 @@ def verifySubreddit(subreddit):
     return True
 
 # Returns list of posts from subreddit as json
-def getPosts(subreddit, after):
+def getPosts(subreddit, query, loops, after):
+  i = 0
   allPosts = []
-    
-  # https://www.reddit.com/dev/api/#GET_hot
-  URL = 'https://reddit.com/r/{}/hot/.json?&limit={}&after={}'.format(subreddit, limit, after)
 
-  posts = requests.get(URL, headers = {'User-agent':'getWallpapers'}).json()
-  for post in posts['data']['children']:
-    allPosts.append(post)
-  after = posts['data']['after']
+  while i < loops:
+    if query:
+      # https://www.reddit.com/dev/api/#GET_search
+      URL = 'https://reddit.com/r/{}/search/.json?q={}&t=all&sort=hot&limit={}&after={}'.format(subreddit, query, limit, after)
+    else:
+      # https://www.reddit.com/dev/api/#GET_hot
+      URL = 'https://reddit.com/r/{}/hot/.json?limit={}&after={}'.format(subreddit, limit, after)
+    
+    posts = requests.get(URL, headers = {'User-agent':'getWallpapers'}).json()
+
+    for post in posts['data']['children']:
+      allPosts.append(post)
+    
+    after = posts['data']['after']
+    i += 1
+
   return allPosts
 
 # Returns false if URL is not an image
@@ -113,9 +124,10 @@ def storeImg(post):
 # START SCRIPT --------
 # ---------------------
 
-# Check if subreddit name is specified as parameter
+# Check if a subreddit and/or a search query are specified
 try:
   subreddit = sys.argv[1]
+  query     = sys.argv[2]
 except:
   pass
 
@@ -129,20 +141,17 @@ if not verifySubreddit(subreddit):
 # Print starting message
 
 print('\n--------------------------------------------')
-print('r/{} ({}x{})'.format(subreddit, str(min_width), str(min_height)))
+if query:
+  print('r/{} ({}) ({}x{})'.format(subreddit, query, str(min_width), str(min_height)))
+else:
+  print('r/{} ({}x{})'.format(subreddit, str(min_width), str(min_height)))
 print('--------------------------------------------\n')
 
 # For reddit pagination (Leave empty)
 after = ''
 
 # Stores posts from function
-posts = getPosts(subreddit, after)
-
-# For adding index numbers to loop
-index = 1
-
-# Counting amount of images downloaded
-downloadCount = 0
+posts = getPosts(subreddit, query, loops, after)
 
 # Loops through all posts
 for post in posts:
@@ -150,16 +159,14 @@ for post in posts:
   # print the post's title
   print(post['data']['title'])
 
-  # Skip post with less than 10 up votes
-  if post['data']['ups'] < 10:
-    print('  Skipping: not enough up votes')
-    index += 1
+  # Skip post with unconvincing up votes
+  if post['data']['ups'] < 50:
+    print('  Skipping: {} is not enough up votes.'.format(post['data']['ups']))
     continue
 
-  if post['data']['link_flair_text'] and post['data']['link_flair_text'] != 'Desktop':
-    print('  Skipping: flair is not for landscape')
-    index += 1
-    continue
+  # if post['data']['link_flair_text'] and post['data']['link_flair_text'] != 'Desktop':
+  #   print('  Skipping: post is not for landscape. {}.'.format(post['data']['link_flair_text']))
+  #   continue
   
   # Shortening variable name
   post = post['data']['url']
@@ -167,31 +174,26 @@ for post in posts:
   # Skip already downloaded images
   if alreadyDownloaded(post):
     print('  Skipping: already used image')
-    index += 1
     continue
 
   # Skip unknown URLs
   elif not knownURL(post):
     print('  Skipping: unhandled url')
-    index += 1
     continue
 
   # Skip post if not image
   elif not isImg(post):
     print('  Skipping: no image in this post')
-    index += 1
     continue
 
   # Skip post on 404 error
   elif not validURL(post):
     print('  Skipping: invalid url')
-    index += 1
     continue
 
   # Skip post should be HD and landscape
   elif not isFit(post, min_width, min_height):
     print('  Skipping: low resolution or portrait image')
-    index += 1
     continue
 
   # All checks cleared, download image
@@ -200,10 +202,7 @@ for post in posts:
     if storeImg(post):
       # update current wallpaper with the new one
       subprocess.Popen(['wall.sh', '-u', os.path.join(directory, os.path.basename(post))])
-      index += 1
-      downloadCount += 1
       break
     # For unexpected errors
     else:
       print('  Skipping: unexpected error')
-      index += 1
