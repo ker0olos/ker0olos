@@ -33,7 +33,6 @@ import urllib
 import subprocess
 from PIL import ImageFile
 
-
 # Returns false on status code error
 def validURL(URL):
   statusCode = requests.get(URL, headers = {'User-agent':'getWallpapers'}).status_code
@@ -50,29 +49,6 @@ def verifySubreddit(subreddit):
     return False
   except:
     return True
-
-# Returns list of posts from subreddit as json
-def getPosts(subreddit, query, loops, after):
-  i = 0
-  allPosts = []
-
-  while i < loops:
-    if query:
-      # https://www.reddit.com/dev/api/#GET_search
-      URL = 'https://reddit.com/r/{}/search/.json?q={}&t=all&sort=hot&limit={}&after={}'.format(subreddit, query, limit, after)
-    else:
-      # https://www.reddit.com/dev/api/#GET_hot
-      URL = 'https://reddit.com/r/{}/hot/.json?limit={}&after={}'.format(subreddit, limit, after)
-    
-    posts = requests.get(URL, headers = {'User-agent':'getWallpapers'}).json()
-
-    for post in posts['data']['children']:
-      allPosts.append(post)
-    
-    after = posts['data']['after']
-    i += 1
-
-  return allPosts
 
 # Returns false if URL is not an image
 def isImg(URL):
@@ -147,62 +123,71 @@ else:
   print('r/{} ({}x{})'.format(subreddit, str(min_width), str(min_height)))
 print('--------------------------------------------\n')
 
-# For reddit pagination (Leave empty)
+i = 0
 after = ''
 
-# Stores posts from function
-posts = getPosts(subreddit, query, loops, after)
-
-# Loops through all posts
-for post in posts:
-
-  # print the post's title
-  print(post['data']['title'])
-
-  # Skip post with unconvincing up votes
-  if post['data']['ups'] < 50:
-    print('  Skipping: {} is not enough up votes.'.format(post['data']['ups']))
-    continue
-
-  # if post['data']['link_flair_text'] and post['data']['link_flair_text'] != 'Desktop':
-  #   print('  Skipping: post is not for landscape. {}.'.format(post['data']['link_flair_text']))
-  #   continue
-  
-  # Shortening variable name
-  post = post['data']['url']
-
-  # Skip already downloaded images
-  if alreadyDownloaded(post):
-    print('  Skipping: already used image')
-    continue
-
-  # Skip unknown URLs
-  elif not knownURL(post):
-    print('  Skipping: unhandled url')
-    continue
-
-  # Skip post if not image
-  elif not isImg(post):
-    print('  Skipping: no image in this post')
-    continue
-
-  # Skip post on 404 error
-  elif not validURL(post):
-    print('  Skipping: invalid url')
-    continue
-
-  # Skip post should be HD and landscape
-  elif not isFit(post, min_width, min_height):
-    print('  Skipping: low resolution or portrait image')
-    continue
-
-  # All checks cleared, download image
+while i < loops:
+  if query:
+    # https://www.reddit.com/dev/api/#GET_search
+    URL = 'https://reddit.com/r/{}/search/.json?q={}&t=all&sort=hot&limit={}&after={}'.format(subreddit, query, limit, after)
   else:
-    # Store image from post locally
-    if storeImg(post):
-      # update current wallpaper with the new one
-      subprocess.Popen(['wall.sh', '-u', os.path.join(directory, os.path.basename(post))])
-      break
-    # For unexpected errors
+    # https://www.reddit.com/dev/api/#GET_hot
+    URL = 'https://reddit.com/r/{}/hot/.json?limit={}&after={}'.format(subreddit, limit, after)
+  
+  data = requests.get(URL, headers = {'user-agent':'wall.py'}).json()['data']
+
+  i += 1
+  after = data['after']
+
+  # Loops through all posts
+  for post in data['children']:
+    # print the post's title
+    print(post['data']['title'])
+
+    # Skip post with unconvincing up votes
+    if post['data']['ups'] < 50:
+      print('  Skipping: {} is not enough up votes.'.format(post['data']['ups']))
+      continue
+
+    # if post['data']['link_flair_text'] and post['data']['link_flair_text'] != 'Desktop':
+    #   print('  Skipping: post is not for landscape. {}.'.format(post['data']['link_flair_text']))
+    #   continue
+    
+    # Shortening variable name
+    post = post['data']['url']
+
+    # Skip already downloaded images
+    if alreadyDownloaded(post):
+      print('  Skipping: already used image')
+      continue
+
+    # Skip unknown URLs
+    elif not knownURL(post):
+      print('  Skipping: unhandled url')
+      continue
+
+    # Skip post if not image
+    elif not isImg(post):
+      print('  Skipping: no image in this post')
+      continue
+
+    # Skip post on 404 error
+    elif not validURL(post):
+      print('  Skipping: invalid url')
+      continue
+
+    # Skip post should be HD and landscape
+    elif not isFit(post, min_width, min_height):
+      print('  Skipping: low resolution or portrait image')
+      continue
+
+    # All checks cleared, download image
     else:
-      print('  Skipping: unexpected error')
+      # Store image from post locally
+      if storeImg(post):
+        # update current wallpaper with the new one
+        subprocess.Popen(['wall.sh', '-u', os.path.join(directory, os.path.basename(post))])
+        sys.exit(0)
+      # For unexpected errors
+      else:
+        print('  Skipping: unexpected error')
