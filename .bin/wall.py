@@ -10,9 +10,10 @@
 # Where to store downloaded images
 directory = '~/Pictures/Wall/'
 # default subreddit to download from
-subreddit = 'wallpapers'
+subreddit = 'Animewallpaper'
 # search query
 query = ''
+up_votes=50
 # min_width = 1920
 # min_height = 1080
 min_width = 1366
@@ -20,7 +21,7 @@ min_height = 768
 # How many posts to get for each request (max=100)
 limit = 100
 # Increase this number if the number above limit is not enough posts
-loops = 5
+pages = 5
 
 # ---------------------
 # IMPORTS -------------
@@ -126,7 +127,7 @@ print('--------------------------------------------\n')
 i = 0
 after = ''
 
-while i < loops:
+while i < pages:
   if query:
     # https://www.reddit.com/dev/api/#GET_search
     URL = 'https://reddit.com/r/{}/search/.json?q={}&t=all&sort=hot&limit={}&after={}'.format(subreddit, query, limit, after)
@@ -145,7 +146,7 @@ while i < loops:
     print(post['data']['title'])
 
     # Skip post with unconvincing up votes
-    if post['data']['ups'] < 50:
+    if post['data']['ups'] < up_votes:
       print('  Skipping: {} is not enough up votes.'.format(post['data']['ups']))
       continue
 

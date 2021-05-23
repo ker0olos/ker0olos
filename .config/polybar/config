@@ -36,7 +36,8 @@ foreground = #FFFFFF
 
 font-0 = Montserrat:size=9:style=bold;3
 font-1 = Noto Sans Arabic:size=9:style=bold;3
-font-2 = Material Design Icons Desktop:size=13;4
+font-2 = Noto Sans CJK JP:size=9:style=bold;3
+font-3 = Material Design Icons Desktop:size=13;4
 
 modules-left = title
 modules-right = like icon

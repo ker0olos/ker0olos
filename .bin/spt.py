@@ -2,9 +2,7 @@
 
 import os
 import sys
-import time
 import datetime
-import subprocess
 import math
 
 import http.client as httplib
@@ -61,12 +59,6 @@ if (not currently_playing):
   elif (command=='toggle'):
     devices=spotify.devices()['devices']
 
-    # try spawning spotifyd if there's working devices
-    if (len(devices) == 0):
-      subprocess.Popen(['spotifyd'])
-      time.sleep(1)
-      devices=spotify.devices()['devices']
-      
     if (len(devices) == 0):
       print('No active devices found.')
       sys.exit()

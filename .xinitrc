@@ -71,7 +71,9 @@ pamac-tray &
 nm-applet &
 # authentication agent
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-# notification daemon 
+# notification daemon
 dunst &
+# spotify connect daemon
+start-spotifyd.sh &
 # window manager
 exec bspwm
