@@ -7,12 +7,13 @@
 # USER CONFIG ---------
 # ---------------------
 
-# Where to store downloaded images
-directory = '~/Pictures/Wall/'
+# Where to store cached images
+cache_directory = '~/Pictures/.wall/'
 # default subreddit to download from
 subreddit = 'Animewallpaper'
 # search query
 query = ''
+# minimal up votes
 up_votes=50
 # min_width = 1920
 # min_height = 1080
@@ -39,7 +40,8 @@ def validURL(URL):
   statusCode = requests.get(URL, headers = {'User-agent':'getWallpapers'}).status_code
   if statusCode == 404:
     return False
-  else: return True
+  else:
+    return True
 
 # Returns false if subreddit doesn't exist
 def verifySubreddit(subreddit):
@@ -55,44 +57,38 @@ def verifySubreddit(subreddit):
 def isImg(URL):
   if URL.endswith(('.png', '.jpeg', '.jpg')):
     return True
-  else: return False
+  else:
+    return False
+
+# Returns true if image from URL is already used
+def alreadySeen(URL):
+  imgName = os.path.basename(URL)
+  localFilePath = os.path.join(cache_directory, imgName)
+  if(os.path.isfile(localFilePath)):
+    return True
+  else:
+    return False
 
 # Returns false if image from URL is not HD (Specified by min-/max_width)
 def isFit(URL, min_width, min_height):
-  file = urllib.request.urlopen(URL)
-  size = file.headers.get("content-length")
-  if size: size = int(size)
-  p = ImageFile.Parser()
-  while 1:
-    data = file.read(1024)
-    if not data:
-      break
-    p.feed(data)
-    if p.image:
-      # return p.image.size
-      if p.image.size[0] >= p.image.size[1] and p.image.size[0] >= min_width and p.image.size[1] >= min_height:
-        return True
-      return False
-  file.close()
-  return False
+  filename = os.path.join(cache_directory, os.path.basename(URL))
+  urllib.request.urlretrieve(URL, filename)
 
-# Returns true if image from URL is already downloaded
-def alreadyDownloaded(URL):
-  imgName = os.path.basename(URL)
-  localFilePath = os.path.join(directory, imgName)
-  if(os.path.isfile(localFilePath)):
-    return True
-  else: return False
+  with open(filename, 'rb') as file:
+    data = file.read()
+
+  p = ImageFile.Parser()
+  p.feed(data)
+
+  if p.image:
+    if p.image.size[0] >= p.image.size[1] and p.image.size[0] >= min_width and p.image.size[1] >= min_height:
+      return True
+    return False
+  return False
 
 # Returns false if image from post/URL is not from reddit or imgur domain
 def knownURL(post):
   if post.lower().startswith('https://i.redd.it/') or post.lower().startswith('http://i.redd.it/') or post.lower().startswith('https://i.imgur.com/') or post.lower().startswith('http://i.imgur.com/'):
-    return True
-  else: return False
-
-# Returns true if image from post/URL is stored locally
-def storeImg(post):
-  if urllib.request.urlretrieve(post, os.path.join(directory, os.path.basename(post))):
     return True
   else:
     return False
@@ -108,7 +104,7 @@ try:
 except:
   pass
 
-directory = expanduser(directory)
+cache_directory = expanduser(cache_directory)
 
 # Exits if invalid subreddit name
 if not verifySubreddit(subreddit):
@@ -130,7 +126,7 @@ after = ''
 while i < pages:
   if query:
     # https://www.reddit.com/dev/api/#GET_search
-    URL = 'https://reddit.com/r/{}/search/.json?q={}&t=all&sort=hot&limit={}&after={}'.format(subreddit, query, limit, after)
+    URL = 'https://reddit.com/r/{}/search/.json?q={}&t=week&sort=top&limit={}&after={}'.format(subreddit, query, limit, after)
   else:
     # https://www.reddit.com/dev/api/#GET_hot
     URL = 'https://reddit.com/r/{}/hot/.json?limit={}&after={}'.format(subreddit, limit, after)
@@ -157,9 +153,9 @@ while i < pages:
     # Shortening variable name
     post = post['data']['url']
 
-    # Skip already downloaded images
-    if alreadyDownloaded(post):
-      print('  Skipping: already used image')
+    # Skip already used images
+    if alreadySeen(post):
+      # print('  Skipping: already seen image')
       continue
 
     # Skip unknown URLs
@@ -185,10 +181,6 @@ while i < pages:
     # All checks cleared, download image
     else:
       # Store image from post locally
-      if storeImg(post):
-        # update current wallpaper with the new one
-        subprocess.Popen(['wall.sh', '-u', os.path.join(directory, os.path.basename(post))])
-        sys.exit(0)
-      # For unexpected errors
-      else:
-        print('  Skipping: unexpected error')
+      # update current wallpaper with the new one
+      subprocess.Popen(['wall.sh', '-u', os.path.join(cache_directory, os.path.basename(post))])
+      sys.exit(0)

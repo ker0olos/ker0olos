@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-DEFAULT_NAME="$HOME/Pictures/Wall/default.jpg"
+DEFAULT_NAME="$HOME/Pictures/.wall/default.jpg"
 
 if [[ "$1" == "-u" ]]; then
   # create copies to the new wallpaper file

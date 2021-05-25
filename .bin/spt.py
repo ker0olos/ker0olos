@@ -49,17 +49,17 @@ playlists = [
 ]
 
 # nothing is playing
-if (not currently_playing):
+if not currently_playing or command == 'skip':
   id = math.ceil(int(datetime.datetime.utcnow().strftime('%S')) / 10) - 1
 
-  if (command=='title'):
+  if command == 'title':
     # print('Nothing is queued.')
     print('It\'s time for ' + spotify.playlist(playlists[id])['name'])
     # print(spotify.current_user_recently_played(limit=1)['items'][0]['track']['name'])
-  elif (command=='toggle'):
+  elif command == 'toggle' or command == 'skip':
     devices=spotify.devices()['devices']
 
-    if (len(devices) == 0):
+    if len(devices) == 0:
       print('No active devices found.')
       sys.exit()
 
@@ -78,22 +78,18 @@ if (not currently_playing):
 else:
   tid=currently_playing['item']['id']
 
-  if (command=='title'):
+  if command == 'title':
     print(currently_playing['item']['name'])
-  elif (command=='toggle'):
+  elif command == 'toggle':
     if currently_playing['is_playing']:
       spotify.pause_playback()
     else:
       spotify.start_playback()
-  elif (command=='skip'):
-    spotify.next_track()
-  # elif (command=='previous'):
-  #   spotify.previous_track()
-  # elif (command=='shuffle'):
-  #   spotify.shuffle(not spotify.current_playback()['shuffle_state'])
-  elif (command=='state'):
+  elif command == 'previous':
+    spotify.previous_track()
+  elif command == 'state':
     print('󰋑') if spotify.current_user_saved_tracks_contains(tracks=[tid])[0] else print('󰋕')
-  elif (command=='like'):
+  elif command == 'like':
     if not spotify.current_user_saved_tracks_contains(tracks=[tid])[0]:
       spotify.current_user_saved_tracks_add(tracks=[tid])
     else:
