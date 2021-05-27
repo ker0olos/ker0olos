@@ -2,13 +2,26 @@
 
 import os
 import sys
-import datetime
+import psutil
+import subprocess
+
 import math
+import time
+import datetime
 
 import http.client as httplib
 
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+
+def running(name):
+  for proc in psutil.process_iter():
+    try:
+      if name in proc.name():
+        return True
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+      pass
+  return False;
 
 # parse arguments
 if len(sys.argv) > 1:
@@ -26,9 +39,9 @@ except:
   connection.close()
   sys.exit()
 
-spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id='9f40f49585234c6d8762592b05ad615a',
-                                               client_secret='660c830473474d95b23996e4cf3ff5a6',
-                                               redirect_uri='http://localhost:8888/callback',
+spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=os.environ['SPOTIFY_CLIENT_ID'],
+                                               client_secret=os.environ['SPOTIFY_CLIENT_SECRET'],
+                                               redirect_uri='http://localhost:8870/callback',
                                                cache_path=os.environ['HOME']+'/.spotify_cache',
                                                scope='user-read-playback-state,user-modify-playback-state,user-library-read,user-library-modify,user-read-recently-played'))
 
@@ -55,6 +68,10 @@ if not currently_playing or command == 'skip' or command == 'play':
   elif command == 'title':
     print('Time for your {}.'.format(playlists[id][1]))
   elif command == 'toggle' or command == 'skip' or command == 'play':
+    if not running('spotifyd'):
+      subprocess.Popen(['spotifyd'])
+      time.sleep(1)
+
     devices=spotify.devices()['devices']
 
     if len(devices) == 0:

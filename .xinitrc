@@ -73,5 +73,7 @@ nm-applet &
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon
 dunst &
+# spotify daemon
+spotifyd &
 # window manager
 exec bspwm
