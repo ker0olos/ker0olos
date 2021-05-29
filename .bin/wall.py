@@ -33,7 +33,7 @@ import sys
 import requests
 import urllib
 import subprocess
-from PIL import ImageFile
+from PIL import Image, ImageFilter
 
 # Returns false on status code error
 def validURL(URL):
@@ -64,27 +64,11 @@ def isImg(URL):
 def alreadySeen(URL):
   imgName = os.path.basename(URL)
   localFilePath = os.path.join(cache_directory, imgName)
-  if(os.path.isfile(localFilePath)):
+
+  if os.path.isfile(localFilePath):
     return True
   else:
     return False
-
-# Returns false if image from URL is not HD (Specified by min-/max_width)
-def isFit(URL, min_width, min_height):
-  filename = os.path.join(cache_directory, os.path.basename(URL))
-  urllib.request.urlretrieve(URL, filename)
-
-  with open(filename, 'rb') as file:
-    data = file.read()
-
-  p = ImageFile.Parser()
-  p.feed(data)
-
-  if p.image:
-    if p.image.size[0] >= p.image.size[1] and p.image.size[0] >= min_width and p.image.size[1] >= min_height:
-      return True
-    return False
-  return False
 
 # Returns false if image from post/URL is not from reddit or imgur domain
 def knownURL(post):
@@ -92,6 +76,42 @@ def knownURL(post):
     return True
   else:
     return False
+
+def processImage(post, filename):
+  urllib.request.urlretrieve(post, filename)
+
+  with Image.open(filename) as img:
+    # Image is in protrait
+    if img.size[0] < img.size[1]:
+      resizeImage(img, filename)
+  
+  subprocess.Popen(['wall.sh', '-u', filename ])
+
+def resizeImage(img, filename):
+  ratio = min_height / img.size[1]
+
+  copy_size=(int(img.size[0] * ratio), int(img.size[1] * ratio))
+  copy_postion=(int((min_width * 0.5) - (copy_size[0] * 0.5)), 0)
+
+  # resize the image to fit the desired size with while keeping its aspect ratio
+  copy = img.resize(size=copy_size, resample=Image.ANTIALIAS)
+  
+  # resize the image to stretch to the desired size
+  background_copy = img.resize(size=(min_width, min_height), resample=Image.ANTIALIAS)
+
+  # blur the background copy of the image
+  background_copy = background_copy.filter(ImageFilter.GaussianBlur(radius=25))
+
+  # rotate the original image
+  # FIXME resampling looks like shit
+  # copy = copy.convert('RGBA').rotate(angle=5, resample=Image.NEAREST, expand=1)
+
+  # center the rotated image inside the background
+  # background_copy.alpha_composite(copy, dest=copy_postion)
+  background_copy.paste(copy, box=copy_postion)
+  
+  # override the original image with the new one
+  background_copy.save(fp=filename)
 
 # ---------------------
 # START SCRIPT --------
@@ -115,9 +135,9 @@ if not verifySubreddit(subreddit):
 
 print('\n--------------------------------------------')
 if query:
-  print('r/{} ({}) ({}x{})'.format(subreddit, query, str(min_width), str(min_height)))
+  print('{} at r/{}'.format(query, subreddit))
 else:
-  print('r/{} ({}x{})'.format(subreddit, str(min_width), str(min_height)))
+  print('r/{}'.format(subreddit))
 print('--------------------------------------------\n')
 
 i = 0
@@ -173,14 +193,7 @@ while i < pages:
       print('  Skipping: invalid url')
       continue
 
-    # Skip post should be HD and landscape
-    elif not isFit(post, min_width, min_height):
-      print('  Skipping: low resolution or portrait image')
-      continue
-
-    # All checks cleared, download image
     else:
-      # Store image from post locally
       # update current wallpaper with the new one
-      subprocess.Popen(['wall.sh', '-u', os.path.join(cache_directory, os.path.basename(post))])
+      processImage(post, os.path.join(cache_directory, os.path.basename(post)))
       sys.exit(0)

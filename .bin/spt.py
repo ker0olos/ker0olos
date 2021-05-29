@@ -68,15 +68,12 @@ if not currently_playing or command == 'skip' or command == 'play':
   elif command == 'title':
     print('Time for your {}.'.format(playlists[id][1]))
   elif command == 'toggle' or command == 'skip' or command == 'play':
-    if not running('spotifyd'):
-      subprocess.Popen(['spotifyd'])
-      time.sleep(1)
-
     devices=spotify.devices()['devices']
 
-    if len(devices) == 0:
-      print('No active devices found.')
-      sys.exit()
+    if not running('spotifyd') or len(devices) == 0:
+      subprocess.Popen(['spotifyd'])
+      time.sleep(1)
+      devices=spotify.devices()['devices']
 
     if (command == 'play'):
       for i, item in enumerate(playlists):
