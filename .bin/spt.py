@@ -84,6 +84,8 @@ if not currently_playing or command == 'skip' or command == 'play':
 
     spotify.shuffle(True)
     spotify.repeat('context')
+
+    spotify.next_track()
   else:
     print('')
 else:

@@ -1,7 +1,5 @@
 #!/usr/bin/node
 
-const { get: req } = require('https');
-
 const { exec } = require('child_process');
 
 /**
@@ -23,6 +21,7 @@ function get(black, white)
   const data = b64(JSON.stringify(obj)).replace('/', '_').replace('+', '-');
 
   // const endpoint = 'http://localhost:3000';
+  
   const endpoint = 'https://api.airtegal.me';
 
   return {
@@ -31,47 +30,18 @@ function get(black, white)
   }
 }
 
-// console.log(process.argv);
-
 /**
-* @type { 'view' | 'download' | 'random' }
+* @type { 'view' | 'download' }
 */
 const type = process.argv[2];
 
-if (type === 'random')
-{
-  req('https://api.airtegal.me/combos?region=egypt', (res) =>
-  {
-    let data = '';
+const [ black, white ]  = [ process.argv[3], process.argv.slice(4) ];
 
-    res.on('data', (c) => data += c);
+const { pictureURL, shareURL } = get(black, white);
 
-    res.on('end', () =>
-    {
-      const cards = JSON.parse(data);
+console.log('Opening In Browser...');
 
-      cards.forEach(obj =>
-      {
-        const { pictureURL } = get(obj.card.content, obj.combos.map(c => c.content));
-
-        exec(`xdg-open ${pictureURL}`);
-      });
-    });
-  });
-}
+if (type === 'view')
+  exec(`xdg-open "${shareURL}"`);
 else
-{
-  const [ black, white ]  = [ process.argv[3], process.argv.slice(4) ];
-  
-  // console.log('black', black);
-  // console.log('white', white);
-  
-  const { pictureURL, shareURL } = get(black, white);
-  
-  console.log('Opening In Browser...');
-  
-  if (type === 'view')
-    exec(`xdg-open ${shareURL}`);
-  else if (type === 'download')
-    exec(`xdg-open ${pictureURL}`);
-}
+  exec(`xdg-open "${pictureURL}"`);
