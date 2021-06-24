@@ -1,4 +1,4 @@
-![A Screenshot of a Linux Desktop](https://github.com/ItsKerolos/ItsKerolos/raw/main/2021-02-09-144637_1366x768_scrot.png)
+![A Screenshot of a Linux Desktop](https://github.com/ItsKerolos/ItsKerolos/raw/main/2021-06-24-225815_1366x768_scrot.png)
 
 <h6 align="center"><i>(Send dots.)</i></h6>
 
