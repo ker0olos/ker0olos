@@ -53,18 +53,19 @@ playlists = [
   [ 'spotify:playlist:37i9dQZF1E3855z4z5OsPs', 'Daily Mix 2' ],
   [ 'spotify:playlist:37i9dQZF1E39jZuNJB5bh7', 'Daily Mix 3' ],
   [ 'spotify:playlist:37i9dQZF1E36Hq1lYk3e5n', 'Daily Mix 4' ],
-  [ 'spotify:playlist:37i9dQZEVXbsA9iS8lxmLk', 'Release Radar' ],
-  # [ 'spotify:playlist:37i9dQZF1DWV4t1PmvRVd9', 'Egyptian Indie' ],
+  # [ 'spotify:playlist:37i9dQZEVXbsA9iS8lxmLk', 'Release Radar' ],
+  [ 'spotify:playlist:37i9dQZF1DWV4t1PmvRVd9', 'Egyptian Indie' ],
   # [ 'spotify:playlist:37i9dQZF1DWUQM3rmTXpBR', 'Arab Indie' ],
-  [ 'spotify:artist:1PhE6rv0146ZTQosoPDjk8', 'Calliope Mori' ]
+  # [ 'spotify:artist:1PhE6rv0146ZTQosoPDjk8', 'Calliope Mori' ],
+  [ 'spotify:playlist:37i9dQZF1E4zOrFkZz5lEa', 'Calliope Mori Radio' ] 
 ]
 
 # nothing is playing
 if not currently_playing or command == 'skip' or command == 'play':
   id = math.ceil(int(datetime.datetime.utcnow().strftime('%S')) / 10) - 1
 
-  if command == 'title' and 'artist' in playlists[id][0]:
-    print('I can hear {}!!'.format(playlists[id][1]))
+  if command == 'title' and 'Radio' in playlists[id][1]:
+    print('{}!!'.format(playlists[id][1]))
   elif command == 'title':
     print('Time for your {}.'.format(playlists[id][1]))
   elif command == 'toggle' or command == 'skip' or command == 'play':
