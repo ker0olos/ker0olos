@@ -146,7 +146,7 @@ after = ''
 while i < pages:
   if query:
     # https://www.reddit.com/dev/api/#GET_search
-    URL = 'https://reddit.com/r/{}/search/.json?q={}&t=week&sort=top&restrict_sr=on&limit={}&after={}'.format(subreddit, query, limit, after)
+    URL = 'https://reddit.com/r/{}/search/.json?q={}&t=week&sort=hot&restrict_sr=on&limit={}&after={}'.format(subreddit, query, limit, after)
   else:
     # https://www.reddit.com/dev/api/#GET_hot
     URL = 'https://reddit.com/r/{}/hot/.json?limit={}&after={}'.format(subreddit, limit, after)

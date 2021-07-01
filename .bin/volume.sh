@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-MUTED=$(pulseaudio-ctl | grep -o 'Is sink muted.*:.*' | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g' | awk '{print substr($0,20,3) }')
+MUTED=$(pamixer --get-mute)
 
 function unmute {
-  if [[ "$MUTED" = "yes" ]]; then
-    pulseaudio-ctl mute
+  if [[ "$MUTED" = "true" ]]; then
+	  pamixer -t
   fi
 }
 
@@ -21,30 +21,30 @@ function notifiy_mute {
 function notifiy_level {
   ICON=󰕿
 
-  LEVEL=$(pulseaudio-ctl | grep -o 'Volume level.*:.*' | sed 's/\x1B\[[0-9;]\+[A-Za-z]//g' | awk '{print substr($0,20)}')
-  LEVEL="${LEVEL/\%/}"
+  LEVEL=$(pamixer --get-volume)
 
   if (( $LEVEL >= 70 )); then
     ICON=󰕾
   elif (( $LEVEL >= 35 )); then
     ICON=󰖀
   fi
+
   dunstify -r 500 -a volume-shortcut "$ICON" "<b>$LEVEL%</b>"
 }
 
 case $1 in
     up)
-	  pulseaudio-ctl up
+	  pamixer -i 5
     unmute
     notifiy_level
 	;;
     down)
-	  pulseaudio-ctl down
+	  pamixer -d 5
     unmute
     notifiy_level
 	;;
     mute)
-	  pulseaudio-ctl mute
+	  pamixer -t
     notifiy_mute
 	;;
 esac

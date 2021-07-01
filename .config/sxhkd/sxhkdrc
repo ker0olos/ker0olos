@@ -9,10 +9,6 @@ super + Return
 # Keyboard Launcher
 super + F1
   launcher.sh
-
-# Keyboard Launcher
-super + n
-  notif-center.sh
   
 ####################
 ###  BSP CLient  ###

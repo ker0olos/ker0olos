@@ -77,9 +77,6 @@
 [experimental]
   per_monitor_dpi = false
 
-[log_notifs]
-  script = ~/.bin/dunst_logger.sh
-
 [dunst_icon]
    appname = dunst
    new_icon = /usr/share/icons/Papirus-Dark/48x48/apps/bell.svg
