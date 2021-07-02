@@ -2,16 +2,10 @@
 
 MUTED=$(pamixer --get-mute)
 
-function unmute {
-  if [[ "$MUTED" = "true" ]]; then
-	  pamixer -t
-  fi
-}
-
 function notifiy_mute {
   # ICON=󰖁
 
-  if [[ "$MUTED" = "yes" ]]; then
+  if [[ "$MUTED" = "true" ]]; then
     dunstify -r 500 -a volume-shortcut "" "<b><i>unmuted</i></b>"
   else
     dunstify -r 500 -a volume-shortcut "" "<b><i>muted</i></b>"
@@ -34,13 +28,13 @@ function notifiy_level {
 
 case $1 in
     up)
-	  pamixer -i 5
-    unmute
+	  pamixer -i 5 --allow-boost
+    pamixer -u
     notifiy_level
 	;;
     down)
-	  pamixer -d 5
-    unmute
+	  pamixer -d 5 --allow-boost
+    pamixer -u
     notifiy_level
 	;;
     mute)
