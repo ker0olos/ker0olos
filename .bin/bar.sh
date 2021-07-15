@@ -6,9 +6,11 @@ killall -q polybar
 # Wait until the processes have been shut down
 while pgrep -u $UID -x polybar >/dev/null; do sleep 1; done
 
-# Launch polybar
 polybar date &
 polybar system &
 polybar stats &
 polybar tray &
-polybar spotify &
+
+if [[ "$1" == "--spotify" ]]; then
+  polybar spotify &
+fi

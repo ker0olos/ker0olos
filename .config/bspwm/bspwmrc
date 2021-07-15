@@ -26,4 +26,4 @@ dual_monitor
 wall.sh
 
 # polybar
-bar.sh &
+bar.sh --spotify &
