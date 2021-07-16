@@ -15,10 +15,8 @@ subreddit = 'Animewallpaper'
 query = ''
 # minimal up votes
 up_votes=50
-# min_width = 1920
-# min_height = 1080
-min_width = 1366
-min_height = 768
+min_width = 1920
+min_height = 1080
 # How many posts to get for each request (max=100)
 limit = 100
 # Increase this number if the number above limit is not enough posts

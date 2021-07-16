@@ -46,16 +46,16 @@ show_devices (){
     elif [ "$isreach" = "false" ] && [ "$istrust" = "true" ]
     then
         devices+="$(get_icon -1)$SEPERATOR"
-    else
-        haspairing="$(qdbus org.kde.kdeconnect "/modules/kdeconnect/devices/$deviceid" org.kde.kdeconnect.device.hasPairingRequests)"
+    # else
+    #     haspairing="$(qdbus org.kde.kdeconnect "/modules/kdeconnect/devices/$deviceid" org.kde.kdeconnect.device.hasPairingRequests)"
 
-        if [ "$haspairing" = "true" ]
-        then
-          show_pmenu2 "$devicename" "$deviceid"
-        fi
+    #     if [ "$haspairing" = "true" ]
+    #     then
+    #       show_pmenu2 "$devicename" "$deviceid"
+    #     fi
 
-        icon=$(get_icon -2)
-        devices+="%{A1:$DIR/kdeconnect.sh -n $devicename -i $deviceid -p:}$icon%{A}$SEPERATOR"
+    #     icon=$(get_icon -2)
+    #     devices+="%{A1:$DIR/kdeconnect.sh -n $devicename -i $deviceid -p:}$icon%{A}$SEPERATOR"
     fi
   done
 

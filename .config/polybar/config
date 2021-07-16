@@ -145,12 +145,12 @@ exec = cpu-speed.sh
 type = custom/script
 
 interval = 0.25
-exec = /home/ker0olos/.config/polybar/modules/kdeconnect.sh -d
+exec = kdeconnect.sh -d
 
 [module/title]
 type = custom/script
 
-interval = 2
+interval = 4
 exec = echo $(ara.sh "$(spt.py title)")
 
 [module/icon]
@@ -160,7 +160,7 @@ content = " 󰓇"
 [module/like]
 type = custom/script
 
-interval = 1
+interval = 8
 exec = spt.py state
 
 click-left = spt.py like &
