@@ -10,7 +10,3 @@ polybar date &
 polybar system &
 polybar stats &
 polybar tray &
-
-if [[ "$1" == "--spotify" ]]; then
-  polybar spotify &
-fi
