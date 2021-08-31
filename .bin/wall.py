@@ -1,197 +1,131 @@
 #!/usr/bin/python
 
-# Original script by mrsorensen
-# https://github.com/mrsorensen/reddit-wallpaper-downloader/blob/013d075fc7c1b51e1ecbaf0908ab66cbe0db9b45/getWalls.py
-
-# ---------------------
-# USER CONFIG ---------
-# ---------------------
-
-# Where to store cached images
-cache_directory = '~/Pictures/.wall/'
-# default subreddit to download from
-subreddit = 'Animewallpaper'
-# search query
-query = ''
-# minimal up votes
-up_votes=50
-min_width = 1920
-min_height = 1080
-# How many posts to get for each request (max=100)
-limit = 100
-# Increase this number if the number above limit is not enough posts
-pages = 5
-
-# ---------------------
-# IMPORTS -------------
-# ---------------------
 import os
-from os.path import expanduser
 import sys
-import requests
 import urllib
 import subprocess
+
+import praw
+
 from PIL import Image, ImageFilter
 
-# Returns false on status code error
-def validURL(URL):
-  statusCode = requests.get(URL, headers = {'User-agent':'getWallpapers'}).status_code
-  if statusCode == 404:
-    return False
-  else:
-    return True
+_min_votes=50
+_min_width = 1920
+_min_height = 1080
 
-# Returns false if subreddit doesn't exist
-def verifySubreddit(subreddit):
-  URL = 'https://reddit.com/r/{}.json'.format(subreddit)
-  result= requests.get(URL, headers = {'User-agent':'getWallpapers'}).json()
+# default subreddit
+_subreddit = 'Animewallpaper'
+
+# search query
+_query = ''
+
+reddit = praw.Reddit(
+    user_agent="wall.py",
+    client_id=os.environ['REDDIT_CLIENT_ID'],
+    client_secret=os.environ['REDDIT_CLIENT_SECRET'],
+    username=os.environ['REDDIT_USERNAME'],
+    password=os.environ['REDDIT_PASSWORD']
+)
+
+# check if a subreddit and/or a search query are specified
+try:
+  _subreddit = sys.argv[1]
+  _query     = sys.argv[2]
+except:
+  pass
+
+# where to store cached images
+_cache_directory = os.path.expanduser('~/Pictures/.wall/')
+
+subreddit = reddit.subreddit(_subreddit)
+
+# exits if the subreddit doesn't exist
+
+try:
+  reddit.subreddit(_subreddit).id
+except:
+  print('r/{} is not a valid subreddit'.format(subreddit))
+  sys.exit(1)
+
+# print welcome message
+
+print('\n--------------------------------------------')
+print(('r/{} ~ {}' if _query else 'r/{}').format(_subreddit, _query))
+print('--------------------------------------------\n')
+
+def resolveURL(post):
   try:
-    result['error']
-    return False
+    urls = []
+    for id in post.media_metadata:
+      urls.append(dict(id=id, url=post.media_metadata[id]['s']['u']))
+    return urls
   except:
-    return True
+    if post.url.lower().startswith('https://i.redd.it/') or post.url.lower().startswith('https://i.imgur.com/'):
+      return [ dict(id=post.id, url=post.url) ]
+    else:
+      return []
 
-# Returns false if URL is not an image
-def isImg(URL):
-  if URL.endswith(('.png', '.jpeg', '.jpg')):
-    return True
-  else:
-    return False
-
-# Returns true if image from URL is already used
-def alreadySeen(URL):
-  imgName = os.path.basename(URL)
-  localFilePath = os.path.join(cache_directory, imgName)
-
-  if os.path.isfile(localFilePath):
-    return True
-  else:
-    return False
-
-# Returns false if image from post/URL is not from reddit or imgur domain
-def knownURL(post):
-  if post.lower().startswith('https://i.redd.it/') or post.lower().startswith('http://i.redd.it/') or post.lower().startswith('https://i.imgur.com/') or post.lower().startswith('http://i.imgur.com/'):
-    return True
-  else:
-    return False
-
-def processImage(post, filename):
-  urllib.request.urlretrieve(post, filename)
+def processImage(url, filename):
+  urllib.request.urlretrieve(url, filename)
 
   with Image.open(filename) as img:
-    # Image is in protrait
+    # image is in protrait
     if img.size[0] < img.size[1]:
       resizeImage(img, filename)
-  
-  subprocess.Popen(['wall.sh', '-u', filename ])
+      subprocess.Popen(['wall.sh', '-u', filename + '_landscape', '-p', filename ])
+    # image is in landscape
+    else:
+      subprocess.Popen(['wall.sh', '-u', filename ])
 
 def resizeImage(img, filename):
-  ratio = min_height / img.size[1]
+  ratio = _min_height / img.size[1]
 
   copy_size=(int(img.size[0] * ratio), int(img.size[1] * ratio))
-  copy_postion=(int((min_width * 0.5) - (copy_size[0] * 0.5)), 0)
+  copy_postion=(int((_min_width * 0.5) - (copy_size[0] * 0.5)), 0)
 
   # resize the image to fit the desired size with while keeping its aspect ratio
   copy = img.resize(size=copy_size, resample=Image.ANTIALIAS)
   
   # resize the image to stretch to the desired size
-  background_copy = img.resize(size=(min_width, min_height), resample=Image.ANTIALIAS)
+  background_copy = img.resize(size=(_min_width, _min_height), resample=Image.ANTIALIAS)
 
   # blur the background copy of the image
   background_copy = background_copy.filter(ImageFilter.GaussianBlur(radius=25))
-
-  # rotate the original image
-  # FIXME resampling looks like shit
-  # copy = copy.convert('RGBA').rotate(angle=5, resample=Image.NEAREST, expand=1)
 
   # center the rotated image inside the background
   # background_copy.alpha_composite(copy, dest=copy_postion)
   background_copy.paste(copy, box=copy_postion)
   
-  # override the original image with the new one
-  background_copy.save(fp=filename)
+  # save the new one image
+  background_copy.save(fp=filename + '_landscape', format='jpeg')
 
-# ---------------------
-# START SCRIPT --------
-# ---------------------
+for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _query else subreddit.hot(limit=20):
+  print(post.title) # print('{}: https://reddit.com{}'.format(post.title, post.permalink))
 
-# Check if a subreddit and/or a search query are specified
-try:
-  subreddit = sys.argv[1]
-  query     = sys.argv[2]
-except:
-  pass
+  # skip posts with unconvincing number of up votes
 
-cache_directory = expanduser(cache_directory)
+  if post.score < _min_votes:
+    print('  - {} is not enough up votes.'.format(post.score))
+    continue
 
-# Exits if invalid subreddit name
-if not verifySubreddit(subreddit):
-  print('r/{} is not a valid subreddit'.format(subreddit))
-  sys.exit()
+  # resolve all the urls in the post
+  # returns a list of ids and urls
 
-# Print starting message
+  data = resolveURL(post)
 
-print('\n--------------------------------------------')
-if query:
-  print('{} at r/{}'.format(query, subreddit))
-else:
-  print('r/{}'.format(subreddit))
-print('--------------------------------------------\n')
+  for d in data:
+    [ id, url ] = d.values()
 
-i = 0
-after = ''
+    # skip used images
 
-while i < pages:
-  if query:
-    # https://www.reddit.com/dev/api/#GET_search
-    URL = 'https://reddit.com/r/{}/search/.json?q={}&t=week&sort=hot&restrict_sr=on&limit={}&after={}'.format(subreddit, query, limit, after)
-  else:
-    # https://www.reddit.com/dev/api/#GET_hot
-    URL = 'https://reddit.com/r/{}/hot/.json?limit={}&after={}'.format(subreddit, limit, after)
-  
-  data = requests.get(URL, headers = {'user-agent':'wall.py'}).json()['data']
-
-  i += 1
-  after = data['after']
-
-  # Loops through all posts
-  for post in data['children']:
-    # print the post's title
-    print(post['data']['title'])
-
-    # Skip post with unconvincing up votes
-    if post['data']['ups'] < up_votes:
-      print('  Skipping: {} is not enough up votes.'.format(post['data']['ups']))
-      continue
-
-    # if post['data']['link_flair_text'] and post['data']['link_flair_text'] != 'Desktop':
-    #   print('  Skipping: post is not for landscape. {}.'.format(post['data']['link_flair_text']))
+    # if os.path.isfile(os.path.join(_cache_directory, id)):
+    #   print('  - already used before')
     #   continue
-    
-    # Shortening variable name
-    post = post['data']['url']
 
-    # Skip already used images
-    if alreadySeen(post):
-      # print('  Skipping: already seen image')
-      continue
+    # update current wallpaper with the new one
 
-    # Skip unknown URLs
-    elif not knownURL(post):
-      print('  Skipping: unhandled url')
-      continue
+    processImage(url, os.path.join(_cache_directory, id))
 
-    # Skip post if not image
-    elif not isImg(post):
-      print('  Skipping: no image in this post')
-      continue
+    # exit the up after finding one wallpaper that can be used
 
-    # Skip post on 404 error
-    elif not validURL(post):
-      print('  Skipping: invalid url')
-      continue
-
-    else:
-      # update current wallpaper with the new one
-      processImage(post, os.path.join(cache_directory, os.path.basename(post)))
-      sys.exit(0)
+    sys.exit()
