@@ -10,8 +10,8 @@ import praw
 from PIL import Image, ImageFilter
 
 _min_votes=50
-_min_width = 1920
-_min_height = 1080
+_min_width = 1366
+_min_height = 768
 
 # default subreddit
 _subreddit = 'Animewallpaper'
@@ -118,9 +118,9 @@ for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _que
 
     # skip used images
 
-    # if os.path.isfile(os.path.join(_cache_directory, id)):
-    #   print('  - already used before')
-    #   continue
+    if os.path.isfile(os.path.join(_cache_directory, id)):
+      print('  - already used before')
+      continue
 
     # update current wallpaper with the new one
 
