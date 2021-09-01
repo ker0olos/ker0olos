@@ -113,8 +113,8 @@ for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _que
 
   data = resolveURL(post)
 
-  for d in data:
-    [ id, url ] = d.values()
+  for i in range(len(data)):
+    [ id, url ] = data[i].values()
 
     # skip used images
 
@@ -125,6 +125,11 @@ for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _que
     # update current wallpaper with the new one
 
     processImage(url, os.path.join(_cache_directory, id))
+
+    # notify user about how many images are left in the collection
+
+    if len(data) > 0:
+      print('  - {} left in this collection.'.format(len(data) - 1 - i))
 
     # exit the up after finding one wallpaper that can be used
 
