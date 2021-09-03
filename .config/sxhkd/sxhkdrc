@@ -14,26 +14,35 @@ super + F1
 ###  BSP CLient  ###
 ####################
 
-# Send the window to a given workspace
+# Send the window to a given destop
 super + {1-9}
   bspc node -d '^{1-9}'
 
-# Switch between windows in current workspace
-ctrl + alt + Tab
-  bspc node -f next.local
+# Scroll through desktops
+super + e
+  bspc desktop -f next.occupied.local
 
+# Rearrange the current node
 super + {Left,Down,Up,Right}
   bspc node -s {west,south,north,east}
 
-# Rotate desktop
+# Scroll through nodes
+super + {s,w,a,d}
+  bspc node -f {south,north,west,east}.window
+
+# Rotate current node
 super + r
   bspc node @/ -R 90
 
-# Scroll through occupied workspaces
-super + {s,w}
-  bspc desktop -f {prev,next}.occupied
+# Fix the node opacity
+super + p
+  if [[ "$(xprop -id $(bspc query -N -n .local.focused) -notype _NET_WM_WINDOW_OPACITY)" == *"not found." ]]; then \
+    picom-trans -w "$(bspc query -N -n .local.focused)" -o 100; \
+  else \
+    picom-trans -w "$(bspc query -N -n .local.focused)" -d; \
+  fi
 
-# Switch window between tiled and fullscreen
+# Switch node between tiled and fullscreen
 super + f
   if [ -z "$(bspc query -N -n .local.fullscreen)" ]; then \
     bspc node -t fullscreen; \
@@ -41,14 +50,7 @@ super + f
     bspc node -t tiled; \
   fi
 
-super + shift + f
-    if [ -z "$(bspc query -N -n .local.floating)" ]; then \
-    bspc node -t floating; \
-  else \
-    bspc node -t tiled; \
-  fi
-
-# Switch window between pseudo_tiled and tiled
+# Switch node between pseudo and tiled
 super + t
   if [ -z "$(bspc query -N -n .local.focused.pseudo_tiled)" ]; then \
     bspc node -t pseudo_tiled; \
@@ -56,7 +58,7 @@ super + t
     bspc node -t tiled; \
   fi
 
-# (Un)hide window
+# (Un)hide node
 super + h
   if [ -z "$(bspc query -N -n .local.hidden)" ]; then \
     bspc node -g hidden; \
@@ -64,11 +66,11 @@ super + h
     bspc node $(bspc query -N -n .local.hidden | tail -n1) -g hidden=off; \
   fi
 
-# Close window
+# Close node
 super + x
   bspc node -c
 
-# Quit bspwm
+# Restart bspwm
 alt + shift + q
   bspc quit
 
@@ -98,9 +100,6 @@ super + space
 ####################
 ###  Media Keys  ###
 ####################
-
-super + p
-  playerctl play-pause
 
 XF86AudioRaiseVolume
   volume.sh up

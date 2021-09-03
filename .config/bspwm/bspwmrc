@@ -17,10 +17,6 @@ bspc rule -a "Code" state=pseudo_tiled rectangle=800x600+0+0
 
 bspc rule -a "Authy Desktop" state=pseudo_tiled rectangle=400x680+0+0
 
-bspc rule -a "Gnome-calculator" state=pseudo_tiled
-
-bspc rule -a "Gcolor2" state=pseudo_tiled
-
 # dual monitor detection and setup
 dual_monitor
 
