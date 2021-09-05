@@ -128,7 +128,7 @@ for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _que
 
     # notify user about how many images are left in the collection
 
-    if len(data) > 0:
+    if len(data) > 1:
       print('  - {} left in this collection.'.format(len(data) - 1 - i))
 
     # exit the up after finding one wallpaper that can be used
