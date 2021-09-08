@@ -11,15 +11,7 @@ then
   xclip -selection clipboard -t image/png -i "$PWD/$SCREENSHOT"
 
   # sent a notification with dunst with a preview of the screenshot
-  # and as a feedback that the screenshot was taken successfully
-  ACTION=$(dunstify -a screenshot-app -i "$PWD/$SCREENSHOT" "Screenshot" "Copied to clipboard" --action="default,Open")
-
-  # when clicked open the screenshot in default app
-  case "$ACTION" in
-  "default")
-      xdg-open "$PWD/$SCREENSHOT"
-      ;;
-  esac
+  dunstify -a screenshot-app -i "$PWD/$SCREENSHOT" "Screenshot" "Copied to clipboard"
 else
   echo "Screenshot aborted"
 fi

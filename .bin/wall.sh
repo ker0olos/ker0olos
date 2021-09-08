@@ -13,16 +13,8 @@ if [[ "$1" == "-u" ]]; then
     echo "wall.sh -u $2" > "$HOME/Pictures/.wall/default"
   fi
 
-  # update notification
-
-  ACTION=$(dunstify -i "$2" "Your wallpaper" "<b>Just got updated</b>" -u low --action="default,Open")
-
-  # when clicked open the wallpaper in default app
-  case "$ACTION" in
-  "default")
-    xdg-open "$2"
-    ;;
-  esac
+  # sent a notification with dunst with a preview of the wallpaper
+  dunstify -i "$2" "Your wallpaper" "<b>Just got updated</b>" -u low
 else
   sh -c "$(cat $HOME/Pictures/.wall/default)"
 fi
