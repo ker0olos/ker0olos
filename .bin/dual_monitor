@@ -33,4 +33,9 @@ else
   bspc monitor eDP-1 -d I II III IV V
 fi
 
+# re-merge Xresources
 xrdb -merge ~/.Xresources
+
+# reset wallpaper and polybar 
+bar.sh
+wall.sh

@@ -16,6 +16,12 @@ _min_height = 768
 # default subreddit
 _subreddit = 'Animewallpaper'
 
+_blacklist = [
+  "Naruto",
+  "Evangelion",
+  "Bunny"
+]
+
 # search query
 _query = ''
 
@@ -100,37 +106,40 @@ def resizeImage(img, filename):
   background_copy.save(fp=filename + '_landscape', format='jpeg')
 
 for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _query else subreddit.hot(limit=20):
-  print(post.title) # print('{}: https://reddit.com{}'.format(post.title, post.permalink))
 
   # skip posts with unconvincing number of up votes
-
   if post.score < _min_votes:
-    print('  - {} is not enough up votes.'.format(post.score))
+    # print('  - {} is not enough up votes.'.format(post.score))
     continue
 
   # resolve all the urls in the post
   # returns a list of ids and urls
-
   data = resolveURL(post)
 
   for i in range(len(data)):
     [ id, url ] = data[i].values()
 
-    # skip used images
-
-    if os.path.isfile(os.path.join(_cache_directory, id)):
-      print('  - already used before')
+    # skip blacklisted terms
+    if any(s in post.title for s in _blacklist):
       continue
 
-    # update current wallpaper with the new one
+    # skip used images
+    if os.path.isfile(os.path.join(_cache_directory, id)):
+      # print('  - already used before')
+      continue
 
+    print(post.title)
+    # print('{}: https://reddit.com{}'.format(post.title, post.permalink))
+
+    # update current wallpaper with the new one
     processImage(url, os.path.join(_cache_directory, id))
 
     # notify user about how many images are left in the collection
-
     if len(data) > 1:
       print('  - {} left in this collection.'.format(len(data) - 1 - i))
 
     # exit the up after finding one wallpaper that can be used
     if input('Do you want to keep going? (y/n) ').lower() != 'y':
       sys.exit()
+    else:
+      print()
