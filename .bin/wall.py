@@ -5,9 +5,12 @@ import sys
 import urllib
 import subprocess
 
+import timg
 import praw
 
 from PIL import Image, ImageFilter
+
+_renderer = timg.Renderer()      
 
 _min_votes=50
 _min_width = 1366
@@ -103,7 +106,7 @@ def resizeImage(img, filename):
   background_copy.paste(copy, box=copy_postion)
   
   # save the new one image
-  background_copy.save(fp=filename + '_landscape', format='jpeg')
+  background_copy.save(fp=filename + '_landscape', format='png')
 
 for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _query else subreddit.hot(limit=20):
 
@@ -119,12 +122,14 @@ for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _que
   for i in range(len(data)):
     [ id, url ] = data[i].values()
 
+    filename = os.path.join(_cache_directory, id)
+
     # skip blacklisted terms
     if any(s in post.title for s in _blacklist):
       continue
 
     # skip used images
-    if os.path.isfile(os.path.join(_cache_directory, id)):
+    if os.path.isfile(filename):
       # print('  - already used before')
       continue
 
@@ -132,11 +137,17 @@ for post in subreddit.search(query=_query,sort='hot',time_filter='week') if _que
     # print('{}: https://reddit.com{}'.format(post.title, post.permalink))
 
     # update current wallpaper with the new one
-    processImage(url, os.path.join(_cache_directory, id))
+    processImage(url, filename)
 
     # notify user about how many images are left in the collection
     if len(data) > 1:
       print('  - {} left in this collection.'.format(len(data) - 1 - i))
+
+    _renderer.load_image_from_file(filename)
+    _renderer.resize(50)
+
+    print('')
+    _renderer.render(timg.Ansi24HblockMethod)
 
     # exit the up after finding one wallpaper that can be used
     if input('Do you want to keep going? (y/n) ').lower() != 'y':
