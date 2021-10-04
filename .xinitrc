@@ -51,7 +51,7 @@ blueman-applet &
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon
 dunst &
-# spotify daemon
-spotifyd &
+# battery notifications
+battery.sh &
 # window manager
 exec bspwm
