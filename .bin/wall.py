@@ -10,14 +10,11 @@ import praw
 
 from PIL import Image, ImageFilter
 
-renderer = timg.Renderer()
+_RENDERER = timg.Renderer()
 
 _MIN_VOTES = 50
 _MIN_WIDTH = 1366
 _MIN_HEIGHT = 768
-
-# default subreddit
-_SUBREDDIT = 'Animewallpaper'
 
 _BLACKLIST = [
   "Naruto",
@@ -25,10 +22,13 @@ _BLACKLIST = [
   "Bunny"
 ]
 
-# search query
-_QUERY = ''
+# default subreddit
+SUBREDDIT = 'Animewallpaper'
 
-reddit = praw.Reddit(
+# search query
+QUERY = ''
+
+REDDIT = praw.Reddit(
     user_agent="wall.py",
     client_id=os.environ['REDDIT_CLIENT_ID'],
     client_secret=os.environ['REDDIT_CLIENT_SECRET'],
@@ -38,28 +38,27 @@ reddit = praw.Reddit(
 
 # check if a subreddit and/or a search query are specified
 try:
-  _SUBREDDIT = sys.argv[1]
-  _QUERY     = sys.argv[2]
+  SUBREDDIT = sys.argv[1]
+  QUERY     = sys.argv[2]
 except:
   pass
 
-# where to store cached images
-_cache_directory = os.path.expanduser('~/Pictures/.wall/')
+_SUBREDDIT = REDDIT.subreddit(SUBREDDIT)
 
-subreddit = reddit.subreddit(_SUBREDDIT)
+# where to store cached images
+_CACHE_DIRECTORY = os.path.expanduser('~/Pictures/.wall/')
 
 # exits if the subreddit doesn't exist
-
 try:
-  reddit.subreddit(_SUBREDDIT).id
+  REDDIT.subreddit(SUBREDDIT).id
 except:
-  print('r/{} is not a valid subreddit'.format(subreddit))
+  print('r/{} is not a valid subreddit'.format(_SUBREDDIT))
   sys.exit(1)
 
 # print welcome message
 
 print('\n--------------------------------------------')
-print(('r/{} ~ {}' if _QUERY else 'r/{}').format(_SUBREDDIT, _QUERY))
+print(('r/{} ~ {}' if QUERY else 'r/{}').format(SUBREDDIT, QUERY))
 print('--------------------------------------------\n')
 
 def resolve_url(post):
@@ -74,8 +73,30 @@ def resolve_url(post):
     else:
       return []
 
-def process_image(url, filename):
-  urllib.request.urlretrieve(url, filename)
+def process_image(title, length, index, filename, url):
+  print('\n' + title + '\n')
+
+  if not os.path.isfile(filename):
+    urllib.request.urlretrieve(url, filename)
+
+  _RENDERER.load_image_from_file(filename)
+  
+  _RENDERER.resize(50)
+  _RENDERER.render(timg.Ansi24HblockMethod)
+
+  CHOICES = '(f)orward'
+
+  if index > 0:
+    CHOICES += '/(p)revious'
+
+  if length > 1:
+    CHOICES += '/(s)skip'
+
+  CHOICES += '/(q)uit'
+
+  # notify user about how many images are left in the collection
+  if length > 1:
+    print(' {} left in this collection.'.format(length))
 
   with Image.open(filename) as img:
     # image is in protrait
@@ -85,6 +106,8 @@ def process_image(url, filename):
     # image is in landscape
     else:
       subprocess.Popen(['wall.sh', '-u', filename ])
+
+  return input(f'Do you want to keep going? {CHOICES}: ')
 
 def resize_image(img, filename):
   ratio = _MIN_HEIGHT / img.size[1]
@@ -108,8 +131,13 @@ def resize_image(img, filename):
   # save the new one image
   background_copy.save(fp=filename + '_landscape', format='png')
 
-for post in subreddit.search(query=_QUERY, sort='hot', time_filter='week') if _QUERY else subreddit.hot(limit=20): # pylint: disable=line-too-long
+INDEX = 0
 
+HISTORY = []
+
+_POSTS = _SUBREDDIT.search(query=QUERY, sort='hot', time_filter='week') if QUERY else _SUBREDDIT.hot(limit=20) # pylint: disable=line-too-long
+
+for post in _POSTS:
   # skip posts with unconvincing number of up votes
   if post.score < _MIN_VOTES:
     # print('  - {} is not enough up votes.'.format(post.score))
@@ -122,7 +150,7 @@ for post in subreddit.search(query=_QUERY, sort='hot', time_filter='week') if _Q
   for i, obj  in enumerate(data):
     [ item_id, url ] = obj.values()
 
-    filename = os.path.join(_cache_directory, item_id)
+    filename = os.path.join(_CACHE_DIRECTORY, item_id)
 
     # skip blacklisted terms
     if any(s in post.title for s in _BLACKLIST):
@@ -133,30 +161,29 @@ for post in subreddit.search(query=_QUERY, sort='hot', time_filter='week') if _Q
       # print('  - already used before')
       continue
 
-    print(post.title)
-    # print('{}: https://reddit.com{}'.format(post.title, post.permalink))
+    user_input = process_image(post.title, len(data) - 1 - i, INDEX, filename, url)
 
-    # update current wallpaper with the new one
-    process_image(url, filename)
-
-    # notify user about how many images are left in the collection
-    if len(data) > 1:
-      print('  - {} left in this collection.'.format(len(data) - 1 - i))
-
-    renderer.load_image_from_file(filename)
-    renderer.resize(50)
-
-    print('')
-    renderer.render(timg.Ansi24HblockMethod)
-
-    user_input = input('Do you want to keep going? (y/s/n) ') if len(data) > 1 else input('Do you want to keep going? (y/n) ') # pylint: disable=line-too-long
+    HISTORY.append(( post.title, filename ))
 
     # skip the collection
-    if user_input.lower() == 's':
+    if user_input.lower() == 's' :
       break
 
-    # exit the after finding one wallpaper that can be used
-    if user_input.lower() != 'y':
-      sys.exit()
+    # quit the script
+    if user_input.lower() == 'f':
+      INDEX += 1
+    # go back to the previous image
+    elif user_input.lower() == 'p' and INDEX > 0:
+      INDEX -= 1
+
+      while INDEX < len(HISTORY):
+        user_input = process_image(HISTORY[INDEX][0], 0, INDEX, HISTORY[INDEX][1], None)
+
+        if user_input.lower() == 'f':
+          INDEX += 1
+        elif user_input.lower() == 'p' and INDEX > 0:
+          INDEX -= 1
+        else:
+          sys.exit()
     else:
-      print('')
+      sys.exit()
