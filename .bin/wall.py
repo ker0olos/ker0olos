@@ -161,6 +161,9 @@ for post in _POSTS:
       # print('  - already used before')
       continue
 
+    # upvote submission (because you're a good guy)
+    post.upvote()
+
     user_input = process_image(post.title, len(data) - 1 - i, INDEX, filename, url)
 
     HISTORY.append(( post.title, filename ))
