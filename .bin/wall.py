@@ -74,8 +74,6 @@ def resolve_url(post):
       return []
 
 def process_image(title, length, index, filename, url):
-  print('\n' + title + '\n')
-
   if not os.path.isfile(filename):
     urllib.request.urlretrieve(url, filename)
 
@@ -83,6 +81,8 @@ def process_image(title, length, index, filename, url):
   
   _RENDERER.resize(50)
   _RENDERER.render(timg.Ansi24HblockMethod)
+
+  print('\n' + title + '\n')
 
   CHOICES = '(f)orward'
 
