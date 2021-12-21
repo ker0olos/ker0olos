@@ -5,12 +5,9 @@ import sys
 import urllib
 import subprocess
 
-import timg
 import praw
 
 from PIL import Image, ImageFilter
-
-_RENDERER = timg.Renderer()
 
 _MIN_VOTES = 50
 _MIN_WIDTH = 1366
@@ -77,11 +74,6 @@ def process_image(title, length, index, filename, url):
   if not os.path.isfile(filename):
     urllib.request.urlretrieve(url, filename)
 
-  _RENDERER.load_image_from_file(filename)
-  
-  _RENDERER.resize(50)
-  _RENDERER.render(timg.Ansi24HblockMethod)
-
   print('\n' + title + '\n')
 
   CHOICES = '(f)orward'
@@ -134,6 +126,14 @@ def resize_image(img, filename):
 INDEX = 0
 
 HISTORY = []
+
+x='8'
+y='50'
+width='450'
+height='150'
+
+subprocess.Popen(['bspc', 'node', 'focused', '-t', 'floating']);
+subprocess.Popen(['xdotool', 'getactivewindow', 'windowsize', width, height, 'windowmove', x, y]);
 
 _POSTS = _SUBREDDIT.search(query=QUERY, sort='hot', time_filter='week') if QUERY else _SUBREDDIT.hot(limit=20) # pylint: disable=line-too-long
 
