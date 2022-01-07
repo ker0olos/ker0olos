@@ -35,8 +35,7 @@ REDDIT = praw.Reddit(
 
 # check if a subreddit and/or a search query are specified
 try:
-  SUBREDDIT = sys.argv[1]
-  QUERY     = sys.argv[2]
+  QUERY = sys.argv[1]
 except:
   pass
 
@@ -135,7 +134,7 @@ height='150'
 subprocess.Popen(['bspc', 'node', 'focused', '-t', 'floating']);
 subprocess.Popen(['xdotool', 'getactivewindow', 'windowsize', width, height, 'windowmove', x, y]);
 
-_POSTS = _SUBREDDIT.search(query=QUERY, sort='hot', time_filter='week') if QUERY else _SUBREDDIT.hot(limit=20) # pylint: disable=line-too-long
+_POSTS = _SUBREDDIT.search(query=QUERY, sort='hot', time_filter='year') if QUERY else _SUBREDDIT.hot(limit=20) # pylint: disable=line-too-long
 
 for post in _POSTS:
   # skip posts with unconvincing number of up votes
