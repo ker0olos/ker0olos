@@ -35,7 +35,7 @@ REDDIT = praw.Reddit(
 
 # check if a subreddit and/or a search query are specified
 try:
-  QUERY = sys.argv[1]
+  QUERY = sys.argv[1] if sys.argv[1] != '-l' else None
 except:
   pass
 
@@ -92,13 +92,16 @@ def process_image(title, length, index, filename, url):
   with Image.open(filename) as img:
     # image is in protrait
     if img.size[0] < img.size[1]:
-      resize_image(img, filename)
-      subprocess.Popen(['wall.sh', '-u', filename + '_landscape', '-p', filename ])
+      if sys.argv[1] != '-l' and sys.argv[2] != '-l':
+        resize_image(img, filename)
+        subprocess.Popen(['wall.sh', '-u', filename + '_landscape', '-p', filename ])
+        return input(f'Do you want to keep going? {CHOICES}: ')
+      else:
+        return 'f'
     # image is in landscape
     else:
       subprocess.Popen(['wall.sh', '-u', filename ])
-
-  return input(f'Do you want to keep going? {CHOICES}: ')
+      return input(f'Do you want to keep going? {CHOICES}: ')
 
 def resize_image(img, filename):
   ratio = _MIN_HEIGHT / img.size[1]
