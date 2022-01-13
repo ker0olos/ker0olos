@@ -13,6 +13,12 @@ eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
 
 export SSH_AUTH_SOCK
 
+xrandr --setprovideroutputsource modesetting NVIDIA-0
+xrandr --auto
+xrandr --dpi 96
+
+xrdb -merge ~/.Xresources 
+
 xsetroot -cursor_name left_ptr &
 
 # map super keys to trigger when used alone
@@ -39,10 +45,10 @@ xinput set-prop "AlpsPS/2 ALPS GlidePoint" "libinput Tapping Enabled" 1
 exec sxhkd &
 # compositor
 picom --experimental-backends --backend glx -b &
-# redlight
-redshift &
 # pamac update notifier tray
 pamac-tray &
+# redshift
+redshift -m randr &
 # network manager tray
 nm-applet &
 # bluetooth manager tray
@@ -51,7 +57,5 @@ blueman-applet &
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon
 dunst &
-# battery notifications
-battery.sh &
 # window manager
 exec bspwm
