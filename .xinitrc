@@ -51,6 +51,8 @@ pamac-tray &
 redshift -m randr &
 # network manager tray
 nm-applet &
+# premid
+premid &
 # bluetooth manager tray
 blueman-applet &
 # authentication agent

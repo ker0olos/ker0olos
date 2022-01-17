@@ -15,6 +15,14 @@ if [[ "$1" == "-u" ]]; then
 
   # sent a notification with dunst with a preview of the wallpaper
   dunstify -i "$2" "Your wallpaper" "<b>Just got updated</b>" -u low
+elif [[ "$1" == "bookmark" ]]; then
+  cp "$HOME/Pictures/.wall/default" "$HOME/Pictures/.wall/$2"
+  echo "Bookmarked current wallpaper as \"$2\""
 else
+  if [[ ! -z "$1" && -f "$HOME/Pictures/.wall/$1" ]]; then
+    cp "$HOME/Pictures/.wall/$1" "$HOME/Pictures/.wall/default"
+    echo "Updating to the bookmarked wallpaper \"$1\""
+  fi
+
   sh -c "$(cat $HOME/Pictures/.wall/default)"
 fi
