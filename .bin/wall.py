@@ -92,7 +92,7 @@ def process_image(title, length, index, filename, url):
   with Image.open(filename) as img:
     # image is in protrait
     if img.size[0] < img.size[1]:
-      if sys.argv[1] != '-l' and sys.argv[2] != '-l':
+      if not '-l' in sys.argv:
         resize_image(img, filename)
         subprocess.Popen(['wall.sh', '-u', filename + '_landscape', '-p', filename ])
         return input(f'Do you want to keep going? {CHOICES}: ')
@@ -163,9 +163,6 @@ for post in _POSTS:
       # print('  - already used before')
       continue
 
-    # upvote submission (because you're a good guy)
-    post.upvote()
-
     user_input = process_image(post.title, len(data) - 1 - i, INDEX, filename, url)
 
     HISTORY.append(( post.title, filename ))
@@ -189,6 +186,8 @@ for post in _POSTS:
         elif user_input.lower() == 'p' and INDEX > 0:
           INDEX -= 1
         else:
+          post.upvote()
           sys.exit()
     else:
+      post.upvote()
       sys.exit()
