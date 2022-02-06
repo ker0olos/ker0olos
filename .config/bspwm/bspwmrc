@@ -17,6 +17,8 @@ bspc rule -a "Code" state=pseudo_tiled rectangle=800x600+0+0
 
 bspc rule -a "Authy Desktop" state=pseudo_tiled rectangle=400x680+0+0
 
+bspc rule -a "Peek" state=floating rectangle=640x480+0+0
+
 # dual monitor detection and setup
 # dual_monitor
 
