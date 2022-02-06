@@ -15,6 +15,8 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+alias xdg-open="~/.bin/xdg-open"
+
 if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
   exec startx
 fi
