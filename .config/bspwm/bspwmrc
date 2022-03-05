@@ -19,13 +19,5 @@ bspc rule -a "Authy Desktop" state=pseudo_tiled rectangle=400x680+0+0
 
 bspc rule -a "Peek" state=floating rectangle=640x480+0+0
 
-# dual monitor detection and setup
-# dual_monitor
-
-bspc monitor eDP-1-1 -d I II III IV V
-
-# set default wallpaper
-wall.sh
-
-# polybar
-bar.sh &
+# setup monitor
+dual_monitor
