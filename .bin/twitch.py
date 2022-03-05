@@ -65,41 +65,48 @@ try:
     keyboard.Listener(on_press=on_press, on_release=on_release).start()
 
     while True:
-        resp = sock.recv(1024 * 4).decode("utf-8")
+        for resp in sock.recv(1024 * 4).decode("utf-8").split("\r\n"):
 
-        if resp.startswith("PING"):
-            sock.send("PONG\n".encode("utf-8"))
+            if resp.startswith("PING"):
+                sock.send("PONG\n".encode("utf-8"))
 
-        resp = demojize(resp)
+            # clear unicode emojis
+            resp = demojize(resp)
 
-        resp = re.sub("\s+", " ", resp).strip()
+            # clear additional whitespace
+            resp = re.sub("\s+", " ", resp).strip()
 
-        matches = re.search(":(.*)\!.*@.*\.tmi\.twitch\.tv PRIVMSG #(.*) :(.*)", resp)
+            # parse irc messages
+            matches = re.findall(f"@(.*).tmi.twitch.tv PRIVMSG {CHANNEL} :(.*)", resp)
 
-        if not matches:
-            continue
+            for (username, message) in matches:
 
-        username, _, message = matches.groups()
+                # print all incoming messages in order
+                if COMMAND == "chat":
+                    print(f"\n[{username}]: {message}")
 
-        if COMMAND == "chat":
-            print(f"\n[{username}]: {message}")
-        elif COMMAND == "votes":
-            for word in set(message.lower().split(" ")):
-                heatmap[word] = heatmap[word] + 1 if word in heatmap else 1
+                # keeps track of the most sent words since the process started
+                # very convenient and plug-less tool for doing chat polls
+                elif COMMAND == "votes":
+                    # split the message to a list of unique case-insensitive words
+                    # then add add to words to a heatmap
+                    for word in set(message.lower().split(" ")):
+                        heatmap[word] = 1 if word not in heatmap else heatmap[word] + 1
 
-            arr = sorted(heatmap, key=heatmap.__getitem__, reverse=True)
+                    # clear the terminal
+                    print("\033c", end="")
 
-            # clear the terminal
-            print("\033c", end="")
+                    # print the 8 top used words
+                    for word in sorted(heatmap, key=heatmap.__getitem__, reverse=True)[
+                        :8
+                    ]:
+                        print(f"[{word}]:= {heatmap[word]}")
 
-            # print the 8 top used words
-            for word in arr[:8]:
-                print(f"[{word}]:= {heatmap[word]}")
+                    # print the elapsed time
+                    print(f"\n{datetime.timedelta(seconds=round(time.time() - t))}")
 
-            # print the elapsed time
-            print(f"\n{datetime.timedelta(seconds=round(time.time() - t))}")
-        else:
-            raise Exception("Unsupported command")
+                else:
+                    raise Exception("Unsupported command")
 
 except KeyboardInterrupt:
     print("Interrupted")
