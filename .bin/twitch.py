@@ -1,20 +1,26 @@
-#!/usr/bin/python
+#!/usr/bin/pypy3
 
-import re
+import datetime
 import os
-import sys
+import re
 import signal
 import socket
-
-from pynput import keyboard
+import sys
+import time
 
 from emoji import demojize
+from pynput import keyboard
 
 PORT = 6667
 NICKNAME = "*"
 CHANNEL = "#%s" % os.environ["TWITCH_CHANNEL"]
 TOKEN = os.environ["TWITCH_TOKEN"]
 SERVER = "irc.chat.twitch.tv"
+
+
+heatmap = {}
+
+t = time.time()
 
 sock = socket.socket()
 
@@ -53,6 +59,8 @@ sock.send(f"PASS {TOKEN}\n".encode("utf-8"))
 sock.send(f"NICK {NICKNAME}\n".encode("utf-8"))
 sock.send(f"JOIN {CHANNEL}\n".encode("utf-8"))
 
+print(f"\nConnected to {CHANNEL}!\n")
+
 try:
     keyboard.Listener(on_press=on_press, on_release=on_release).start()
 
@@ -62,25 +70,42 @@ try:
         if resp.startswith("PING"):
             sock.send("PONG\n".encode("utf-8"))
 
-        matches = re.search(
-            ":(.*)\!.*@.*\.tmi\.twitch\.tv PRIVMSG #(.*) :(.*)", demojize(resp)
-        )
+        resp = demojize(resp)
+
+        resp = re.sub("\s+", " ", resp).strip()
+
+        matches = re.search(":(.*)\!.*@.*\.tmi\.twitch\.tv PRIVMSG #(.*) :(.*)", resp)
 
         if not matches:
-            print(resp)
             continue
 
         username, _, message = matches.groups()
 
         if COMMAND == "chat":
             print(f"\n[{username}]: {message}")
+        elif COMMAND == "votes":
+            for word in set(message.lower().split(" ")):
+                heatmap[word] = heatmap[word] + 1 if word in heatmap else 1
+
+            arr = sorted(heatmap, key=heatmap.__getitem__, reverse=True)
+
+            # clear the terminal
+            print("\033c", end="")
+
+            # print the 8 top used words
+            for word in arr[:8]:
+                print(f"[{word}]:= {heatmap[word]}")
+
+            # print the elapsed time
+            print(f"\n{datetime.timedelta(seconds=round(time.time() - t))}")
         else:
             raise Exception("Unsupported command")
 
 except KeyboardInterrupt:
     print("Interrupted")
-    socket.close()
 
 except Exception as e:
-    print("Exception:", e)
     raise e
+
+finally:
+    sock.close()
