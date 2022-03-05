@@ -10,10 +10,10 @@ from pynput import keyboard
 from emoji import demojize
 
 PORT = 6667
-NICKNAME = __file__
+NICKNAME = "*"
+CHANNEL = "#%s" % os.environ["TWITCH_CHANNEL"]
 TOKEN = os.environ["TWITCH_TOKEN"]
 SERVER = "irc.chat.twitch.tv"
-CHANNEL = "#atwholesome"
 
 sock = socket.socket()
 
@@ -71,12 +71,13 @@ try:
         )
 
         if not matches:
+            print(resp)
             continue
 
         username, _, message = matches.groups()
 
         if COMMAND == "chat":
-            print(f"[{username}]: {message}")
+            print(f"\n[{username}]: {message}")
         else:
             raise Exception("Unsupported command")
 
