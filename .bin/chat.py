@@ -49,21 +49,21 @@ def on_keyup(key):
 
 def on_message(message: TwitchMessage):
     # clear unicode emojis
-    message.content = demojize(message.content)
+    message.text = demojize(message.text)
 
     # clear additional whitespace
-    message.content = re.sub("\s+", " ", message.content).strip()
+    message.text = re.sub("\s+", " ", message.text).strip()
 
     # keeps track of the most sent words since the process started
     if COMMAND == "votes":
         # split the message to a list of unique case-insensitive words
         # then add add to words to a heatmap
-        for word in set(message.content.lower().split(" ")):
-            heatmap[word] = 1 if word not in heatmap else heatmap[word] + 1
+        for w in set(message.text.lower().split(" ")):
+            heatmap[w] = 1 if w not in heatmap else heatmap[w] + 1
 
     # print all incoming messages in order
     else:
-        print(f"\n[{message.username}]: {message.content}")
+        print(f"\n[{message.author}]: {message.text}")
 
 
 try:
@@ -73,22 +73,22 @@ try:
 
     twitch.start()
 
-    twitch.subscribe_chat_message(on_message)
+    twitch.listen(on_message)
 
     print(f"\nConnected to {CHANNEL}!\n")
 
-    while not twitch.is_closed:
+    while True:
         # keeps track of the most sent words since the process started
         # very convenient and plug-less tool for doing chat polls
         if COMMAND == "votes":
             # clear the terminal
             print("\033c", end="")
 
-            # print the 8 top used words
+            # print an x amount of used words in order of most used
             for word in sorted(heatmap, key=heatmap.__getitem__, reverse=True)[:8]:
                 print(f"[{word}]:= {heatmap[word]}")
 
-            # print the elapsed time
+            # print elapsed time
             print(f"\n{datetime.timedelta(seconds=round(time.time() - t))}")
 
             time.sleep(1)

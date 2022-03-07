@@ -6,17 +6,14 @@ import threading
 # this script is still new and error prone
 # and can need manually restarts
 
-# it was made to match shughes-uk/python-youtubechat APIs
-# to allow seamless transitions for multi-streams
 
-
-class TwitchMessage:
+class Message:
     def __init__(self, username, message):
-        self.username: str = username
-        self.content: str = message
+        self.text: str = message
+        self.author: str = username
 
 
-class TwitchChat:
+class Chat:
     def __init__(self, token, channel):
         self.__listeners__ = []
 
@@ -25,10 +22,8 @@ class TwitchChat:
 
         self.__sock__ = socket.socket()
 
-        self.__stop__ = threading.Event()
+        self.__stopped__ = False
         self.__thread__ = threading.Thread(target=self.__start__)
-
-        self.is_closed = False
 
     def __start__(self):
         self.__sock__.connect(("irc.chat.twitch.tv", 6667))
@@ -38,10 +33,10 @@ class TwitchChat:
         self.__sock__.send(f"JOIN #{self.__channel__}\n".encode("utf-8"))
 
         try:
-            while not self.__stop__.is_set():
+            while not self.__stopped__:
                 for resp in self.__sock__.recv(1024 * 4).decode("utf-8").split("\r\n"):
 
-                    if self.__stop__.is_set():
+                    if self.__stopped__:
                         break
 
                     if resp.startswith("PING"):
@@ -58,15 +53,18 @@ class TwitchChat:
         except Exception as e:
             raise e
 
-        finally:
-            self.is_closed = True
-
     def start(self):
+        self.__stopped__ = False
         self.__thread__.start()
 
-    def stop(self):
-        self.__sock__.close()
-        self.__stop__.set()
+    def join(self):
+        if self.__thread__.is_alive():
+            self.__thread__.join()
 
-    def subscribe_chat_message(self, listener):
+    def stop(self):
+        self.__stopped__ = True
+        self.__sock__.close()
+        self.join()
+
+    def listen(self, listener):
         self.__listeners__.append(listener)

@@ -1,12 +1,11 @@
 #!/usr/bin/python
 
 import os
+import subprocess
 import sys
 import urllib
-import subprocess
 
 import praw
-
 from PIL import Image, ImageFilter
 
 _MIN_VOTES = 50
