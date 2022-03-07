@@ -17,11 +17,14 @@ class Message:
 
 
 class Chat:
-    def __init__(self, token, channel):
+    def __init__(self, channel):
         self.__listeners__ = []
 
-        self.__token__ = token
         self.__channel__ = channel
+
+        self.__token__ = (
+            os.environ["TWITCH_TOKEN"] if "TWITCH_TOKEN" in os.environ else None
+        )
 
         self.__client__ = socket.socket()
 
@@ -29,6 +32,9 @@ class Chat:
 
     def __start__(self):
         self.__client__.connect(("irc.chat.twitch.tv", 6667))
+
+        if self.__token__ is None:
+            raise Exception("No twitch token in environment variables")
 
         self.__client__.send(f"PASS {self.__token__}\n".encode("utf-8"))
         self.__client__.send(f"NICK *\n".encode("utf-8"))

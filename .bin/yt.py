@@ -26,16 +26,16 @@ credentials_file = "yt_credentials.json"
 
 class Chat(twitch.Chat):
     def __init__(self, channel):
-        with open(credentials_file, "r") as file:
-            super().__init__(json.load(file)["token"], channel)
+        super().__init__(channel)
 
-        self.__client__ = googleapiclient.discovery.build(
-            "youtube",
-            api_version,
-            credentials=google_auth_oauthlib.flow.google.oauth2.credentials.Credentials(
-                token=self.__token__
-            ),
-        )
+        with open(credentials_file, "r") as file:
+            self.__client__ = googleapiclient.discovery.build(
+                "youtube",
+                api_version,
+                credentials=google_auth_oauthlib.flow.google.oauth2.credentials.Credentials(
+                    token=json.load(file)["token"]
+                ),
+            )
 
     def __start__(self):
         # search for live streams in channel
@@ -88,7 +88,8 @@ class Chat(twitch.Chat):
                         and "userComment" in event["snippet"]["superChatDetails"]
                     ):
                         message = twitch.Message(
-                            bits=event["snippet"]["superChatDetails"]["tier"],
+                            bits=event["snippet"]["superChatDetails"]["amountMicros"]
+                            / 10000,
                             author=event["authorDetails"]["displayName"],
                             text=event["snippet"]["superChatDetails"]["userComment"],
                         )

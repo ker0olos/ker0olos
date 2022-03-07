@@ -21,7 +21,7 @@ CTRL = False
 SHIFT = False
 
 if len(sys.argv) < 2:
-    raise KeyError()
+    raise Exception("No streaming service was selected")
 
 SERVICE = sys.argv[1]
 COMMAND = sys.argv[2] if len(sys.argv) > 2 else None
@@ -70,9 +70,9 @@ try:
     if SERVICE == "yt":
         chat = yt.Chat(os.environ["YOUTUBE_CHANNEL"])
     elif SERVICE == "twitch":
-        twitch.Chat(os.environ["TWITCH_TOKEN"], os.environ["TWITCH_CHANNEL"])
+        twitch.Chat(os.environ["TWITCH_CHANNEL"])
     else:
-        raise KeyError()
+        raise Exception("Unsupported service")
 
     keyboard.Listener(on_press=on_keydown, on_release=on_keyup).start()
 
