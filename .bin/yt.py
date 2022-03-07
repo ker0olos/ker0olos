@@ -88,6 +88,9 @@ class Chat(twitch.Chat):
                         and "userComment" in event["snippet"]["superChatDetails"]
                     ):
                         message = twitch.Message(
+                            # 100 bits is $1.00
+                            # 1000000 micros is $1.00
+                            # 1000000 / 10000 === 100 === $1.00
                             bits=event["snippet"]["superChatDetails"]["amountMicros"]
                             / 10000,
                             author=event["authorDetails"]["displayName"],

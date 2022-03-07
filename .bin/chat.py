@@ -70,7 +70,7 @@ try:
     if SERVICE == "yt":
         chat = yt.Chat(os.environ["YOUTUBE_CHANNEL"])
     elif SERVICE == "twitch":
-        twitch.Chat(os.environ["TWITCH_CHANNEL"])
+        chat = twitch.Chat(os.environ["TWITCH_CHANNEL"])
     else:
         raise Exception("Unsupported service")
 
