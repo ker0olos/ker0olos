@@ -10,7 +10,7 @@ import time
 from emoji import demojize
 from pynput import keyboard
 
-from twitch import TwitchChat, TwitchMessage
+from twitch import Chat, Message
 
 TOKEN = os.environ["TWITCH_TOKEN"]
 CHANNEL = os.environ["TWITCH_CHANNEL"]
@@ -47,7 +47,7 @@ def on_keyup(key):
         os.kill(os.getpid(), signal.SIGINT)
 
 
-def on_message(message: TwitchMessage):
+def on_message(message: Message):
     # clear unicode emojis
     message.text = demojize(message.text)
 
@@ -63,11 +63,11 @@ def on_message(message: TwitchMessage):
 
     # print all incoming messages in order
     else:
-        print(f"\n[{message.author}]: {message.text}")
+        print(f"\n[{message.bits}][{message.author}]: {message.text}")
 
 
 try:
-    twitch = TwitchChat(TOKEN, CHANNEL)
+    twitch = Chat(TOKEN, CHANNEL)
 
     keyboard.Listener(on_press=on_keydown, on_release=on_keyup).start()
 
@@ -94,7 +94,7 @@ try:
             time.sleep(1)
 
 except KeyboardInterrupt:
-    print("\n\nInterrupted\n")
+    print("\nterminated\n")
 
 except Exception as e:
     raise e
