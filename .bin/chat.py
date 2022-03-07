@@ -10,10 +10,8 @@ import time
 from emoji import demojize
 from pynput import keyboard
 
-from twitch import Chat, Message
-
-TOKEN = os.environ["TWITCH_TOKEN"]
-CHANNEL = os.environ["TWITCH_CHANNEL"]
+import twitch
+import yt
 
 heatmap = {}
 
@@ -22,7 +20,11 @@ t = time.time()
 CTRL = False
 SHIFT = False
 
-COMMAND = sys.argv[1] if len(sys.argv) > 1 else None
+if len(sys.argv) < 2:
+    raise KeyError()
+
+SERVICE = sys.argv[1]
+COMMAND = sys.argv[2] if len(sys.argv) > 2 else None
 
 
 def on_keydown(key):
@@ -47,19 +49,17 @@ def on_keyup(key):
         os.kill(os.getpid(), signal.SIGINT)
 
 
-def on_message(message: Message):
-    # clear unicode emojis
-    message.text = demojize(message.text)
-
+def on_message(message: twitch.Message):
     # clear additional whitespace
-    message.text = re.sub("\s+", " ", message.text).strip()
+    message.text = re.sub(r"\s+", " ", message.text).strip()
 
     # keeps track of the most sent words since the process started
     if COMMAND == "votes":
         # split the message to a list of unique case-insensitive words
         # then add add to words to a heatmap
-        for w in set(message.text.lower().split(" ")):
-            heatmap[w] = 1 if w not in heatmap else heatmap[w] + 1
+        for w in set(demojize(re.sub(r":.*:", "", message.text)).lower().split(" ")):
+            if len(w) > 0:
+                heatmap[w] = 1 if w not in heatmap else heatmap[w] + 1
 
     # print all incoming messages in order
     else:
@@ -67,15 +67,20 @@ def on_message(message: Message):
 
 
 try:
-    twitch = Chat(TOKEN, CHANNEL)
+    if SERVICE == "yt":
+        chat = yt.Chat(os.environ["YOUTUBE_CHANNEL"])
+    elif SERVICE == "twitch":
+        twitch.Chat(os.environ["TWITCH_TOKEN"], os.environ["TWITCH_CHANNEL"])
+    else:
+        raise KeyError()
 
     keyboard.Listener(on_press=on_keydown, on_release=on_keyup).start()
 
-    twitch.start()
+    chat.start()
 
-    twitch.listen(on_message)
+    chat.listen(on_message)
 
-    print(f"\nConnected to {CHANNEL}!\n")
+    print(f"\nConnected to {SERVICE}!\n")
 
     while True:
         # keeps track of the most sent words since the process started
@@ -94,10 +99,10 @@ try:
             time.sleep(1)
 
 except KeyboardInterrupt:
-    print("\nterminated\n")
+    print("terminated\n")
 
 except Exception as e:
     raise e
 
 finally:
-    twitch.stop()
+    chat.stop()
