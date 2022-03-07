@@ -6,6 +6,7 @@ import time
 
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
+from munch import munchify
 
 import twitch
 
@@ -39,7 +40,7 @@ class Chat(twitch.Chat):
 
     def __start__(self):
         # search for live streams in channel
-        response = (
+        response = munchify(
             self.__client__.search()
             .list(
                 part="snippet",
@@ -55,10 +56,10 @@ class Chat(twitch.Chat):
         if len(response["items"]) < 1:
             raise Exception("No live events for this channel")
 
-        videoId = response["items"][0]["id"]["videoId"]
+        videoId = response["items"][0].id.videoId
 
         # get live chat id from the video id
-        response = (
+        response = munchify(
             self.__client__.videos()
             .list(
                 part="liveStreamingDetails",
@@ -67,7 +68,7 @@ class Chat(twitch.Chat):
             .execute()
         )
 
-        liveChatId = response["items"][0]["liveStreamingDetails"]["activeLiveChatId"]
+        liveChatId = response["items"][0].liveStreamingDetails.activeLiveChatId
 
         nextPageToken = None
 
@@ -78,30 +79,29 @@ class Chat(twitch.Chat):
                 liveChatId=liveChatId,
             )
 
-            response = request.execute()
+            response = munchify(request.execute())
 
             # skip first pull
             if nextPageToken is not None:
                 for event in response["items"]:
                     if (
-                        event["snippet"]["type"] == "superChatEvent"
-                        and "userComment" in event["snippet"]["superChatDetails"]
+                        event.snippet.type == "superChatEvent"
+                        and "userComment" in event.snippet.superChatDetails
                     ):
                         message = twitch.Message(
                             # 100 bits is $1.00
                             # 1000000 micros is $1.00
                             # 1000000 / 10000 === 100 === $1.00
-                            bits=event["snippet"]["superChatDetails"]["amountMicros"]
-                            / 10000,
-                            author=event["authorDetails"]["displayName"],
-                            text=event["snippet"]["superChatDetails"]["userComment"],
+                            bits=event.snippet.superChatDetails.amountMicros / 10000,
+                            author=event.authorDetails.displayName,
+                            text=event.snippet.superChatDetails.userComment,
                         )
 
-                    elif event["snippet"]["type"] == "textMessageEvent":
+                    elif event.snippet.type == "textMessageEvent":
                         message = twitch.Message(
                             bits=0,
-                            author=event["authorDetails"]["displayName"],
-                            text=event["snippet"]["textMessageDetails"]["messageText"],
+                            author=event.authorDetails.displayName,
+                            text=event.snippet.textMessageDetails.messageText,
                         )
 
                     if message:
@@ -112,15 +112,14 @@ class Chat(twitch.Chat):
                     # to avoid sending the entire list of message
                     # as a batch
                     time.sleep(
-                        (response["pollingIntervalMillis"] / 1000)
-                        / len(response["items"])
+                        (response.pollingIntervalMillis / 1000) / len(response["items"])
                     )
 
             # sleep the entire interval at once
             if (nextPageToken is None) or (len(response["items"]) == 0):
-                time.sleep(response["pollingIntervalMillis"] / 1000)
+                time.sleep(response.pollingIntervalMillis / 1000)
 
-            nextPageToken = response["nextPageToken"]
+            nextPageToken = response.nextPageToken
 
 
 if __name__ == "__main__":
