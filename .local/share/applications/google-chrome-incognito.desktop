@@ -1,6 +1,6 @@
 [Desktop Entry]
 Version=1.0
-Name=Google Chrome (Incognito)
+Name=Incognito
 StartupWMClass=Google-chrome
 Exec=start-chrome.sh --incognito %U
 StartupNotify=true
