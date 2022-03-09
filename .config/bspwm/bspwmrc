@@ -13,11 +13,9 @@ bspc config external_rules_command ~/.bin/external_rule_pip.sh
 
 bspc rule -a "Alacritty" state=pseudo_tiled follow=on
 
-bspc rule -a "Code" state=pseudo_tiled rectangle=800x600+0+0
-
 bspc rule -a "Authy Desktop" state=pseudo_tiled rectangle=400x680+0+0
 
-bspc rule -a "Peek" state=floating rectangle=640x480+0+0
+bspc rule -a "Peek" state=floating rectangle=800x600+0+0
 
 # setup monitor
 dual_monitor
