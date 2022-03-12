@@ -44,10 +44,10 @@ module-margin = 1
 wm-restack = bspwm
 
 [bar/system]
-width = 7.5%
+width = 8.5%
 height = ${options.height}
 
-offset-x = 77.5%:-16
+offset-x = 76.5%:-16
 offset-y = 8
 
 background = ${colors.background}
@@ -57,7 +57,7 @@ font-0 = Hack Nerd Font:size=8;3
 font-1 = Material Design Icons Desktop:size=13;4
 font-2 = Material Design Icons Desktop:size=13;4
 
-modules-center = pulseaudio kdeconnect 
+modules-center = pulseaudio kdeconnect notifications
 
 module-margin = 1
 
@@ -67,7 +67,7 @@ wm-restack = bspwm
 width = 20
 height = ${options.height}
 
-offset-x = 77.5%:-44
+offset-x = 76.5%:-44
 offset-y = 8
 
 background = #00000000
@@ -122,23 +122,13 @@ type = custom/script
 interval = 0.25
 exec = kdeconnect.sh -d
 
-[module/title]
+[module/notifications]
 type = custom/script
 
-interval = 4
-exec = echo $(ara.sh "$(spt.py title)")
+interval = 0.25
+exec = notifications.sh
 
-[module/icon]
-type = custom/text
-content = " 󰓇"
-
-[module/like]
-type = custom/script
-
-interval = 8
-exec = spt.py state
-
-click-left = spt.py like &
+click-left = notifications.sh toggle
 
 [module/empty]
 type = custom/text
