@@ -36,15 +36,13 @@ show_devices (){
     isreach="$(qdbus org.kde.kdeconnect "/modules/kdeconnect/devices/$deviceid" org.kde.kdeconnect.device.isReachable)"
     istrust="$(qdbus org.kde.kdeconnect "/modules/kdeconnect/devices/$deviceid" org.kde.kdeconnect.device.isTrusted)"
     
-    if [ "$isreach" = "true" ] && [ "$istrust" = "true" ]
-    then
+    if [ "$isreach" = "true" ] && [ "$istrust" = "true" ]; then
         battery="$(qdbus org.kde.kdeconnect "/modules/kdeconnect/devices/$deviceid/battery" org.kde.kdeconnect.device.battery.charge)"
         isCharging="$(qdbus org.kde.kdeconnect "/modules/kdeconnect/devices/$deviceid/battery" org.kde.kdeconnect.device.battery.isCharging)"
         
         icon=$(get_icon "$battery" "$isCharging")
         devices+="%{A1:$DIR/kdeconnect.sh -n '$devicename' -i $deviceid -b $battery -m:}$icon%{A}$SEPERATOR"
-    elif [ "$isreach" = "false" ] && [ "$istrust" = "true" ]
-    then
+    elif [ "$isreach" = "false" ] && [ "$istrust" = "true" ]; then
         devices+="$(get_icon -1)$SEPERATOR"
     # else
     #     haspairing="$(qdbus org.kde.kdeconnect "/modules/kdeconnect/devices/$deviceid" org.kde.kdeconnect.device.hasPairingRequests)"
@@ -100,23 +98,18 @@ show_pmenu () {
 get_icon () {
   icon=$ICON_PHONE
 
-  if [ "$2" = "true" ]
-  then
+  if [ "$2" = "true" ]; then
       icon="$ICON_CHARGING"
   fi
 
   case $1 in
     "-1") ICON="%{F$COLOR_DISCONNECTED}%{T3}$icon%{T-}%{F-}" ;;
     "-2") ICON="%{F$COLOR_NEWDEVICE}%{T3}$icon%{T-}%{F-}" ;;
-    2*)   ICON="%{F$COLOR_BATTERY_20}%{T3}$icon%{T-}%{F-}" ;;
-    3*)   ICON="%{T3}$icon%{T-}" ;;
-    4*)   ICON="%{T3}$icon%{T-}" ;;
-    5*)   ICON="%{T3}$icon%{T-}" ;;
-    6*)   ICON="%{T3}$icon%{T-}" ;;
-    7*)   ICON="%{T3}$icon%{T-}" ;;
-    8*)   ICON="%{T3}$icon%{T-}" ;;
-    9*|100)  ICON="%{F$COLOR_BATTERY_100}%{T3}$icon%{T-}%{F-}" ;;
-    *)       ICON="%{F$COLOR_BATTERY_10}%{T3}$icon%{T-}%{F-}" ;;
+    [0-9])      ICON="%{F$COLOR_BATTERY_10}%{T3}$icon%{T-}%{F-}" ;;
+    1[0-9])     ICON="%{F$COLOR_BATTERY_20}%{T3}$icon%{T-}%{F-}" ;;
+    9[0-9]|100) ICON="%{F$COLOR_BATTERY_100}%{T3}$icon%{T-}%{F-}" ;;
+    *)          ICON="%{T3}$icon%{T-}" ;;
+
   esac
 
   echo $ICON
