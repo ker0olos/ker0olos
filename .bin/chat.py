@@ -8,10 +8,11 @@ import signal
 import datetime
 import subprocess
 
-import yt
-import twitch
 from emoji import demojize
 from pynput import mouse, keyboard
+
+import yt
+import twitch
 
 heatmap = {}
 
