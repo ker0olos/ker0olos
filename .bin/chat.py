@@ -1,4 +1,4 @@
-#!/usr/bin/pypy3
+#!/usr/bin/python
 
 import os
 import re
@@ -10,7 +10,7 @@ import datetime
 import yt
 import twitch
 from emoji import demojize
-from pynput import keyboard
+from pynput import mouse, keyboard
 
 heatmap = {}
 
@@ -25,6 +25,8 @@ if len(sys.argv) < 2:
 SERVICE = sys.argv[1]
 COMMAND = sys.argv[2] if len(sys.argv) > 2 else None
 
+mouse_controller = mouse.Controller()
+keyboard_controller = keyboard.Controller()
 
 def on_keydown(key):
     global CTRL
@@ -49,8 +51,23 @@ def on_keyup(key):
 
 
 def on_plays(message: twitch.Message):
-    pass
+    mouse_delta = 50
 
+    # trunk-ignore(flake8/E999)
+    match message.text:
+        case "left":
+            mouse_controller.move(dx=mouse_delta, dy=0)
+        case "right":
+            mouse_controller.move(dx=-mouse_delta, dy=0)
+        
+        case "up":
+            mouse_controller.move(dx=0, dy=-mouse_delta)
+        case "down":
+            mouse_controller.move(dx=0, dy=mouse_delta)
+            
+        case "click":
+            mouse_controller.click(mouse.Button.left)
+    
 
 def on_message(message: twitch.Message):
     # clear additional whitespace
@@ -86,7 +103,7 @@ try:
 
     chat.listen(on_message)
 
-    print(f"\nConnected to {SERVICE} {COMMAND}! \n")
+    print(f"\nConnected to {SERVICE}! In {COMMAND} mode! \n")
 
     while True:
         # keeps track of the most sent words since the process started
