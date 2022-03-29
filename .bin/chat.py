@@ -6,6 +6,7 @@ import sys
 import time
 import signal
 import datetime
+import subprocess
 
 import yt
 import twitch
@@ -27,6 +28,7 @@ COMMAND = sys.argv[2] if len(sys.argv) > 2 else None
 
 mouse_controller = mouse.Controller()
 keyboard_controller = keyboard.Controller()
+
 
 def on_keydown(key):
     global CTRL
@@ -59,15 +61,18 @@ def on_plays(message: twitch.Message):
             mouse_controller.move(dx=mouse_delta, dy=0)
         case "right":
             mouse_controller.move(dx=-mouse_delta, dy=0)
-        
+
         case "up":
             mouse_controller.move(dx=0, dy=-mouse_delta)
         case "down":
             mouse_controller.move(dx=0, dy=mouse_delta)
-            
+
+        case "screenshot":
+            subprocess.Popen(["screenshot-full.sh"])
+
         case "click":
             mouse_controller.click(mouse.Button.left)
-    
+
 
 def on_message(message: twitch.Message):
     # clear additional whitespace
