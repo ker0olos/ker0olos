@@ -3,9 +3,9 @@
 cd ~/Pictures/Screenshots || exit
 
 # take an interactive screenshot using scrot
-SCREENSHOT="$(scrot -e \"echo "${f}"\" -f -s --line style=solid,width=3)"
+SCREENSHOT=$(scrot -e 'echo $f' -f -s --line style=solid,width=3)
 
-if [[ ${SCREENSHOT} == *".png" ]]; then
+if [[ ${SCREENSHOT} == *.png ]]; then
 	# copy the screenshot to the clipboard
 	xclip -selection clipboard -t image/png -i "${PWD}/${SCREENSHOT}"
 

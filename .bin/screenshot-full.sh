@@ -3,7 +3,7 @@
 cd ~/Pictures/Screenshots || exit
 
 # take a full screenshot using scrot
-SCREENSHOT="$(scrot -e \"echo "${f}"\")"
+SCREENSHOT=$(scrot -e 'echo $f')
 
 if [[ ${SCREENSHOT} == *".png" ]]; then
 	# copy the screenshot to the clipboard
