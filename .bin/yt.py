@@ -1,14 +1,13 @@
 #!/usr/bin/python
 
-import json
 import os
+import json
 import time
 
+import twitch
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 from munch import munchify
-
-import twitch
 
 # keep in mind it might break
 # this script is still new and error prone

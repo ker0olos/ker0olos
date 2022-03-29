@@ -1,9 +1,9 @@
 #!/usr/bin/python
 
 import os
-import subprocess
 import sys
 import urllib
+import subprocess
 
 import praw
 from PIL import Image, ImageFilter
@@ -31,7 +31,7 @@ REDDIT = praw.Reddit(
 # check if a subreddit and/or a search query are specified
 try:
     QUERY = sys.argv[1] if sys.argv[1] != "-l" else None
-except:
+except Exception:
     pass
 
 _SUBREDDIT = REDDIT.subreddit(SUBREDDIT)
@@ -42,7 +42,7 @@ _CACHE_DIRECTORY = os.path.expanduser("~/Pictures/.wall/")
 # exits if the subreddit doesn't exist
 try:
     REDDIT.subreddit(SUBREDDIT).id
-except:
+except Exception:
     print("r/{} is not a valid subreddit".format(_SUBREDDIT))
     sys.exit(1)
 
@@ -59,7 +59,7 @@ def resolve_url(post):
         for media_id in post.media_metadata:
             urls.append(dict(id=media_id, url=post.media_metadata[media_id]["s"]["u"]))
         return urls
-    except:
+    except Exception:
         if post.url.startswith("https://i.redd.it/") or post.url.startswith(
             "https://i.imgur.com/"
         ):
@@ -91,7 +91,7 @@ def process_image(title, length, index, filename, url):
     with Image.open(filename) as img:
         # image is in protrait
         if img.size[0] < img.size[1]:
-            if not "-l" in sys.argv:
+            if "-l" not in sys.argv:
                 resize_image(img, filename)
                 subprocess.Popen(
                     ["wall.sh", "-u", filename + "_landscape", "-p", filename]

@@ -1,15 +1,15 @@
 #!/bin/sh
 
-if [ -d /etc/X11/xinit/xinitrc.d ] ; then
- for f in /etc/X11/xinit/xinitrc.d/?*.sh ; do
-  [ -x "$f" ] && . "$f"
- done
- unset f
+if [ -d /etc/X11/xinit/xinitrc.d ]; then
+	for f in /etc/X11/xinit/xinitrc.d/?*.sh; do
+		[ -x "${f}" ] && . "${f}"
+	done
+	unset f
 fi
 
 [ -f ~/.xprofile ] && . ~/.xprofile
 
-eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
+eval "$(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)"
 
 export SSH_AUTH_SOCK
 
@@ -17,7 +17,7 @@ xrandr --setprovideroutputsource modesetting NVIDIA-0
 xrandr --auto
 xrandr --dpi 96
 
-xrdb -merge ~/.Xresources 
+xrdb -merge ~/.Xresources
 
 xsetroot -cursor_name left_ptr &
 

@@ -1,17 +1,16 @@
 #!/usr/bin/pypy3
 
-import datetime
 import os
 import re
-import signal
 import sys
 import time
+import signal
+import datetime
 
+import yt
+import twitch
 from emoji import demojize
 from pynput import keyboard
-
-import twitch
-import yt
 
 heatmap = {}
 
@@ -49,6 +48,10 @@ def on_keyup(key):
         os.kill(os.getpid(), signal.SIGINT)
 
 
+def on_plays(message: twitch.Message):
+    pass
+
+
 def on_message(message: twitch.Message):
     # clear additional whitespace
     message.text = re.sub(r"\s+", " ", message.text).strip()
@@ -60,6 +63,9 @@ def on_message(message: twitch.Message):
         for w in set(demojize(re.sub(r":.*:", "", message.text)).lower().split(" ")):
             if len(w) > 0:
                 heatmap[w] = 1 if w not in heatmap else heatmap[w] + 1
+
+    elif COMMAND == "plays":
+        on_plays(message)
 
     # print all incoming messages in order
     else:
@@ -80,7 +86,7 @@ try:
 
     chat.listen(on_message)
 
-    print(f"\nConnected to {SERVICE}!\n")
+    print(f"\nConnected to {SERVICE} {COMMAND}! \n")
 
     while True:
         # keeps track of the most sent words since the process started

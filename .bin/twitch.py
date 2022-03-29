@@ -37,9 +37,9 @@ class Chat:
             raise Exception("No twitch token in environment variables")
 
         self.__client__.send(f"PASS {self.__token__}\n".encode("utf-8"))
-        self.__client__.send(f"NICK *\n".encode("utf-8"))
+        self.__client__.send("NICK *\n".encode("utf-8"))
 
-        self.__client__.send(f"CAP REQ :twitch.tv/tags\n".encode("utf-8"))
+        self.__client__.send("CAP REQ :twitch.tv/tags\n".encode("utf-8"))
         self.__client__.send(f"JOIN #{self.__channel__}\n".encode("utf-8"))
 
         try:

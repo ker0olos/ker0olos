@@ -3,16 +3,16 @@
 export EDITOR="nvim"
 export TERM="alacritty"
 
-export PATH=$PATH:$HOME/.bin:$HOME/.local/bin
+export PATH="${PATH}:${HOME}/.bin:${HOME}/.local/bin"
 
-export CXX=/usr/bin/g++ 
+export CXX=/usr/bin/g++
 export CMAKE_CXX_COMPILER=/usr/bin/g++
 
-export XDG_CONFIG_HOME="$HOME/.local/share"
-export XDG_CACHE_HOME="$HOME/.cache"
-export XDG_CONFIG_HOME="$HOME/.config"
+export XDG_CONFIG_HOME="${HOME}/.local/share"
+export XDG_CACHE_HOME="${HOME}/.cache"
+export XDG_CONFIG_HOME="${HOME}/.config"
 
-export $(secrets)
-export $(dbus-launch)
+export "$(secrets)"
+export "$(dbus-launch)"
 
 export QT_QPA_PLATFORMTHEME=gtk3

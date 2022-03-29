@@ -1,3 +1,3 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
-alacritty -e "nvim" $1
+alacritty -e "nvim" "${1}"
