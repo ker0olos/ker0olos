@@ -56,12 +56,11 @@ def on_keyup(key):
 def on_plays(message: twitch.Message):
     mouse_delta = 50
 
-    # trunk-ignore(flake8/E999)
     match message.text:
         case "left":
-            mouse_controller.move(dx=mouse_delta, dy=0)
-        case "right":
             mouse_controller.move(dx=-mouse_delta, dy=0)
+        case "right":
+            mouse_controller.move(dx=mouse_delta, dy=0)
 
         case "up":
             mouse_controller.move(dx=0, dy=-mouse_delta)
