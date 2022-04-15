@@ -42,32 +42,26 @@ class Chat:
         self.__client__.send("CAP REQ :twitch.tv/tags\n".encode("utf-8"))
         self.__client__.send(f"JOIN #{self.__channel__}\n".encode("utf-8"))
 
-        try:
-            while True:
-                for resp in (
-                    self.__client__.recv(1024 * 2).decode("utf-8").split("\r\n")
-                ):
-                    if resp.startswith("PING"):
-                        self.__client__.send("PONG\n".encode("utf-8"))
+        while True:
+            for resp in self.__client__.recv(1024 * 2).decode("utf-8").split("\r\n"):
+                if resp.startswith("PING"):
+                    self.__client__.send("PONG\n".encode("utf-8"))
 
-                    matches = re.findall(
-                        f"badges=(.*);*.@(.*).tmi.twitch.tv PRIVMSG #{self.__channel__} :(.*)",
-                        resp,
-                    )
+                matches = re.findall(
+                    f"badges=(.*);*.@(.*).tmi.twitch.tv PRIVMSG #{self.__channel__} :(.*)",
+                    resp,
+                )
 
-                    for (badges, username, message) in matches:
-                        bits = re.search(r"bits-?.*\/(\d+)", badges)
-                        for listener in self.__listeners__:
-                            listener(
-                                Message(
-                                    author=username,
-                                    bits=int(bits.group(1)) if bits is not None else 0,
-                                    text=message,
-                                )
+                for (badges, username, message) in matches:
+                    bits = re.search(r"bits-?.*\/(\d+)", badges)
+                    for listener in self.__listeners__:
+                        listener(
+                            Message(
+                                author=username,
+                                bits=int(bits.group(1)) if bits else 0,
+                                text=message,
                             )
-
-        except Exception as e:
-            raise e
+                        )
 
     def start(self):
         self.__thread__.start()

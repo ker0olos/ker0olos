@@ -4,10 +4,12 @@ import os
 import json
 import time
 
-import twitch
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 from munch import munchify
+
+from .twitch import Chat as Interface
+from .twitch import Message
 
 # keep in mind it might break
 # this script is still new and error prone
@@ -24,7 +26,7 @@ client_secret_file = "client_secret.json"
 credentials_file = "yt_credentials.json"
 
 
-class Chat(twitch.Chat):
+class Chat(Interface):
     def __init__(self, channel):
         super().__init__(channel)
 
@@ -87,7 +89,7 @@ class Chat(twitch.Chat):
                         event.snippet.type == "superChatEvent"
                         and "userComment" in event.snippet.superChatDetails
                     ):
-                        message = twitch.Message(
+                        message = Message(
                             # 100 bits is $1.00
                             # 1000000 micros is $1.00
                             # 1000000 / 10000 === 100 === $1.00
@@ -97,7 +99,7 @@ class Chat(twitch.Chat):
                         )
 
                     elif event.snippet.type == "textMessageEvent":
-                        message = twitch.Message(
+                        message = Message(
                             bits=0,
                             author=event.authorDetails.displayName,
                             text=event.snippet.textMessageDetails.messageText,

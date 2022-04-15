@@ -112,11 +112,11 @@ def resize_image(img, filename):
     copy_postion = (int((_MIN_WIDTH * 0.5) - (copy_size[0] * 0.5)), 0)
 
     # resize the image to fit the desired size with while keeping its aspect ratio
-    copy = img.resize(size=copy_size, resample=Image.ANTIALIAS)
+    copy = img.resize(size=copy_size, resample=Image.Resampling.LANCZOS)
 
     # resize the image to stretch to the desired size
     background_copy = img.resize(
-        size=(_MIN_WIDTH, _MIN_HEIGHT), resample=Image.ANTIALIAS
+        size=(_MIN_WIDTH, _MIN_HEIGHT), resample=Image.Resampling.LANCZOS
     )
 
     # blur the background copy of the image
