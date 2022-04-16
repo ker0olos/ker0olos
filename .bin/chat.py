@@ -6,14 +6,13 @@ import sys
 import time
 import signal
 import datetime
-import subprocess
 
 from emoji import demojize
-from pynput import mouse, keyboard
+from pynput import keyboard
 
-import chat.yt as yt
 import chat.twitch as twitch
-from chat.twitch import Message
+import chat.youtube as youtube
+from chat import Message, on_plays
 
 heatmap = {}
 
@@ -27,9 +26,6 @@ if len(sys.argv) < 2:
 
 SERVICE = sys.argv[1]
 COMMAND = sys.argv[2] if len(sys.argv) > 2 else None
-
-mouse_controller = mouse.Controller()
-keyboard_controller = keyboard.Controller()
 
 
 def on_keydown(key):
@@ -54,27 +50,6 @@ def on_keyup(key):
         os.kill(os.getpid(), signal.SIGINT)
 
 
-def on_plays(message: Message):
-    mouse_delta = 50
-
-    match message.text.lower():
-        case "left":
-            mouse_controller.move(dx=-mouse_delta, dy=0)
-        case "right":
-            mouse_controller.move(dx=mouse_delta, dy=0)
-
-        case "up":
-            mouse_controller.move(dx=0, dy=-mouse_delta)
-        case "down":
-            mouse_controller.move(dx=0, dy=mouse_delta)
-
-        case "screenshot":
-            subprocess.Popen(["screenshot-full.sh"])
-
-        case "click":
-            mouse_controller.click(mouse.Button.left)
-
-
 def on_message(message: Message):
     # clear additional whitespace
     message.text = re.sub(r"\s+", " ", message.text).strip()
@@ -88,7 +63,11 @@ def on_message(message: Message):
                 demojize(re.sub(r":.*:", "", message.text)).lower().split(" ")
             ):
                 if len(w) > 0:
-                    heatmap[w] = (1 if w not in heatmap else heatmap[w] + 1)
+                    # length = max(message.bits * 0.5, 1)
+                    # if w not in heatmap:
+                    #     heatmap[w] = length
+                    # else:
+                    heatmap[w] += max(message.bits * 0.5, 1)
 
         # chat plays mode
         case "plays":
@@ -102,10 +81,10 @@ def on_message(message: Message):
 if __name__ == "__main__":
     try:
         match SERVICE:
-            case "yt":
-                chat = yt.Chat(os.environ["YOUTUBE_CHANNEL"])
             case "twitch":
                 chat = twitch.Chat(os.environ["TWITCH_CHANNEL"])
+            case "youtube":
+                chat = youtube.Chat(os.environ["YOUTUBE_CHANNEL"])
             case _:
                 raise Exception("Unsupported service")
 

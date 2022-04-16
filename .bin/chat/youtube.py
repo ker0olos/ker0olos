@@ -8,8 +8,8 @@ import google_auth_oauthlib.flow
 import googleapiclient.discovery
 from munch import munchify
 
+from . import Message
 from .twitch import Chat as Interface
-from .twitch import Message
 
 # keep in mind it might break
 # this script is still new and error prone

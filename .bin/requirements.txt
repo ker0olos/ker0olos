@@ -3,7 +3,7 @@
 emoji
 pynput
 
-# yt.py
+# youtube.py
 
 google-auth
 google-auth-httplib2
