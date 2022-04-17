@@ -5,14 +5,16 @@ import re
 import sys
 import time
 import signal
+import asyncio
 import datetime
 
+import uvloop
 from emoji import demojize
 from pynput import keyboard
 
 import chat.twitch as twitch
 import chat.youtube as youtube
-from chat import Message, on_plays
+from chat import Message, plays, on_plays
 
 heatmap = {}
 
@@ -78,7 +80,7 @@ def on_message(message: Message):
             print(f"\n[{message.bits}][{message.author}]: {message.text}")
 
 
-if __name__ == "__main__":
+async def main():
     try:
         match SERVICE:
             case "twitch":
@@ -94,7 +96,7 @@ if __name__ == "__main__":
 
         chat.listen(on_message)
 
-        print(f"\nConnected to {SERVICE}! In {COMMAND} mode! \n")
+        print(f"\nConnected to {SERVICE}!\n")
 
         while True:
             # keeps track of the most sent words since the process started
@@ -117,3 +119,9 @@ if __name__ == "__main__":
 
     finally:
         chat.stop()
+        plays.stop()
+
+
+if __name__ == "__main__":
+    uvloop.install()
+    asyncio.run(main())
