@@ -71,3 +71,14 @@ def on_plays(message: Message):
             return False
 
     return True
+
+
+# if __name__ == "__main__":
+#     import pyttsx3
+
+#     engine = pyttsx3.init()
+#     engine.setProperty("rate", 150)
+#     voices = engine.getProperty("voices")
+#     engine.setProperty("voice", voices[2].id)
+#     engine.say("I will speak this text")
+#     engine.runAndWait()

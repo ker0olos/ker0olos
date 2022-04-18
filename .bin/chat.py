@@ -62,7 +62,9 @@ def on_message(message: Message):
             # split the message to a list of unique case-insensitive words
             # then add add to words to a heatmap
             for w in set(
-                demojize(re.sub(r":.*:", "", message.text)).lower().split(" ")
+                re.findall(
+                    "[a-zA-Z-]+", re.sub(r":.*:", "", demojize(message.text).lower())
+                )
             ):
                 if len(w) > 0:
                     # length = max(message.bits * 0.5, 1)
