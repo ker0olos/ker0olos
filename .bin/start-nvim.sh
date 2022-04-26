@@ -1,3 +1,3 @@
-#!/bin/sh
+#!/bin/bash
 
 alacritty -e "nvim" "${1}"

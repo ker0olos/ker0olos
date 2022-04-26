@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 STATE=$(dunstctl is-paused)
 

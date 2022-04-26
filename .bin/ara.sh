@@ -1,7 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-# trunk-ignore(shellcheck/SC2143)
-if [[ -n "$(echo "$1" | grep -o -P "\p{Arabic}")" ]]; then
+if echo "$1" | grep -o -q -P "\p{Arabic}"; then
 	S="$1"
 	S="${S/)/(}"
 	S="${S/(/)}"

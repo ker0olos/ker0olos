@@ -93,9 +93,7 @@ def process_image(title, length, index, filename, url):
         if img.size[0] < img.size[1]:
             if "-l" not in sys.argv:
                 resize_image(img, filename)
-                subprocess.Popen(
-                    ["wall.sh", "-u", filename + "_landscape", "-p", filename]
-                )
+                subprocess.Popen(["wall.sh", "-u", filename + "_landscape", filename])
                 return input(f"Do you want to keep going? {CHOICES}: ")
             else:
                 return "f"

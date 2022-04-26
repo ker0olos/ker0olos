@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # CONFIGURATION
 LOCATION=0

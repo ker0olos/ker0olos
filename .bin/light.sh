@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 notifiy_level() {
 	LEVEL=$(brightnessctl -m | awk -v FS="(,|%)" '{print $4}')

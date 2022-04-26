@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [[ $1 == "--incognito" ]]; then
 	google-chrome-stable "$2" --enable-features=WebUIDarkMode --force-dark-mode --incognito
