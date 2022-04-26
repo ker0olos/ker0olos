@@ -57,19 +57,21 @@ playlists = [
     ["spotify:playlist:37i9dQZF1E3855z4z5OsPs", "Daily Mix 2"],
     ["spotify:playlist:37i9dQZF1E39jZuNJB5bh7", "Daily Mix 3"],
     ["spotify:playlist:37i9dQZF1E36Hq1lYk3e5n", "Daily Mix 4"],
+    ["spotify:playlist:37i9dQZF1DWV4t1PmvRVd9", "الساقية"],
+    ["spotify:playlist:37i9dQZF1DX2siSxlNkZrf", "ساعة الفراق"],
     # [ 'spotify:playlist:37i9dQZEVXbsA9iS8lxmLk', 'Release Radar' ],
-    ["spotify:playlist:37i9dQZF1DWV4t1PmvRVd9", "Egyptian Indie"],
     # [ 'spotify:playlist:37i9dQZF1DWUQM3rmTXpBR', 'Arab Indie' ],
 ]
 
 # nothing is playing
 if not currently_playing or command == "skip" or command == "play":
-    id = math.ceil(int(datetime.datetime.utcnow().strftime("%S")) / 10) - 1
+    id = min(
+        max(math.ceil(int(datetime.datetime.utcnow().strftime("%S")) / 10) - 1, 0),
+        len(playlists) - 1,
+    )
 
-    if command == "title" and "Radio" in playlists[id][1]:
-        print("{}!!".format(playlists[id][1]))
-    elif command == "title":
-        print("Time for your {}.".format(playlists[id][1]))
+    if command == "title":
+        print(playlists[id][1])
     elif command == "toggle" or command == "skip" or command == "play":
         devices = spotify.devices()["devices"]
 
