@@ -8,9 +8,7 @@ import signal
 import asyncio
 import datetime
 
-import uvloop
 from emoji import demojize
-from pynput import keyboard
 
 import chat.twitch as twitch
 import chat.youtube as youtube
@@ -28,28 +26,6 @@ if len(sys.argv) < 2:
 
 SERVICE = sys.argv[1]
 COMMAND = sys.argv[2] if len(sys.argv) > 2 else None
-
-
-def on_keydown(key):
-    global CTRL
-    global SHIFT
-
-    if key == keyboard.Key.ctrl:
-        CTRL = True
-    elif key == keyboard.Key.shift:
-        SHIFT = True
-
-
-def on_keyup(key):
-    global CTRL
-    global SHIFT
-
-    if key == keyboard.Key.ctrl:
-        CTRL = False
-    elif key == keyboard.Key.shift:
-        SHIFT = False
-    elif key == keyboard.Key.esc and SHIFT and CTRL:
-        os.kill(os.getpid(), signal.SIGINT)
 
 
 def on_message(message: Message):
@@ -92,8 +68,6 @@ async def main():
             case _:
                 raise Exception("Unsupported service")
 
-        keyboard.Listener(on_press=on_keydown, on_release=on_keyup).start()
-
         chat.start()
 
         chat.listen(on_message)
@@ -117,7 +91,7 @@ async def main():
                 time.sleep(1)
 
     except KeyboardInterrupt:
-        print("Interrupted\n")
+        os.kill(os.getpid(), signal.SIGINT)
 
     finally:
         chat.stop()
@@ -125,5 +99,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    uvloop.install()
     asyncio.run(main())

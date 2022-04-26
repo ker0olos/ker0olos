@@ -4,14 +4,9 @@ import random
 import asyncio
 import subprocess
 
-from pynput import keyboard
-
 from .twitch import Message
 
-# mouse_controller = mouse.Controller()
-keyboard_controller = keyboard.Controller()
-
-arrows = [keyboard.Key.left, keyboard.Key.right, keyboard.Key.up, keyboard.Key.down]
+arrows = ["Left", "Right", "Up", "Down"]
 
 
 def probably(chance):
@@ -32,6 +27,14 @@ def popen(*command):
     subprocess.Popen(command, cwd=os.getcwd())
 
 
+def press(name):
+    popen("xdotool", "key", name)
+
+
+# def repeat(name, times=2):
+#     popen("xdotool", "key", "--repeat", str(times), name)
+
+
 def invert_screen():
     popen("xrandr", "--output", "eDP-1-1", "--rotate", "inverted")
     time.sleep(10)
@@ -45,14 +48,27 @@ def stop():
 def on_plays(message: Message):
     match message.text.lower():
         case "left":
-            keyboard_controller.press(arrows[0])
+            press(arrows[0])
         case "right":
-            keyboard_controller.press(arrows[1])
+            press(arrows[1])
 
         case "up":
-            keyboard_controller.press(arrows[2])
+            press(arrows[2])
         case "down":
-            keyboard_controller.press(arrows[3])
+            press(arrows[3])
+
+        case "a":
+            press("a")
+        case "s":
+            press("s")
+
+        case "x":
+            press("x")
+
+        case "e":
+            press("e")
+        case "d":
+            press("d")
 
         case "screenshot":
             popen("screenshot-full.sh")
@@ -63,10 +79,10 @@ def on_plays(message: Message):
 
         case "invert":
             if probably(15 / 100):
-                asyncio.get_running_loop().run_in_executor(None, invert_screen)
+                asyncio.get_event_loop().run_in_executor(None, invert_screen)
 
         case "enter":
-            keyboard_controller.press(keyboard.Key.enter)
+            press("Return")
         case _:
             return False
 

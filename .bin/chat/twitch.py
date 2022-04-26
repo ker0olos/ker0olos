@@ -2,6 +2,7 @@ import os
 import re
 import signal
 import socket
+import asyncio
 import threading
 
 # keep in mind it might break
@@ -28,9 +29,13 @@ class Chat:
 
         self.__client__ = socket.socket()
 
+        self.__event_loop = asyncio.new_event_loop()
+
         self.__thread__ = threading.Thread(target=self.__start__)
 
     def __start__(self):
+        asyncio.set_event_loop(self.__event_loop)
+
         self.__client__.connect(("irc.chat.twitch.tv", 6667))
 
         if self.__token__ is None:
