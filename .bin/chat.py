@@ -4,7 +4,6 @@ import os
 import re
 import sys
 import time
-import signal
 import asyncio
 import datetime
 
@@ -90,12 +89,9 @@ async def main():
 
                 time.sleep(1)
 
-    except KeyboardInterrupt:
-        os.kill(os.getpid(), signal.SIGINT)
-
     finally:
-        chat.stop()
         plays.stop()
+        chat.stop()
 
 
 if __name__ == "__main__":
