@@ -9,21 +9,24 @@ from evdev import ecodes as e
 
 from .twitch import Message
 
+# https://www.kernel.org/doc/html/v5.17/input/gamepad.html
+
 ui = UInput(
     {
         e.EV_KEY: [
-            e.BTN_TRIGGER,
-            e.BTN_THUMB,
-            e.BTN_THUMB2,
-            e.BTN_TOP,
-            e.BTN_TOP2,
-            e.BTN_PINKIE,
-            e.BTN_BASE,
-            e.BTN_BASE2,
-            e.BTN_BASE3,
-            e.BTN_BASE4,
-            e.BTN_BASE5,
-            e.BTN_BASE6,
+            e.BTN_A,
+            e.BTN_B,
+            e.BTN_X,
+            e.BTN_Y,
+            e.BTN_TL,
+            e.BTN_TL2,
+            e.BTN_TR,
+            e.BTN_TR2,
+            e.BTN_SELECT,
+            e.BTN_START,
+            e.BTN_MODE,
+            e.BTN_THUMBL,
+            e.BTN_THUMBR,
         ],
         e.EV_ABS: [
             (e.ABS_X, AbsInfo(value=0, min=-1, max=1, fuzz=0, flat=0, resolution=0)),
@@ -53,25 +56,19 @@ bts = {
     "up": (e.EV_ABS, e.ABS_HAT0Y, -1),
     "down": (e.EV_ABS, e.ABS_HAT0Y, 1),
     # Action-pad
-    "x": (e.EV_KEY, e.BTN_TRIGGER, 1),
-    "y": (e.EV_KEY, e.BTN_THUMB, 1),
-    "a": (e.EV_KEY, e.BTN_THUMB2, 1),
-    "b": (e.EV_KEY, e.BTN_TOP, 1),
+    "a": (e.EV_KEY, e.BTN_A, 1),
+    "b": (e.EV_KEY, e.BTN_B, 1),
+    "x": (e.EV_KEY, e.BTN_X, 1),
+    "y": (e.EV_KEY, e.BTN_Y, 1),
     # Triggers
-    "lb": (
-        e.EV_KEY,
-        e.BTN_TOP2,
-        1,
-    ),
-    "lt": (e.EV_KEY, e.BTN_PINKIE, 1),
-    "rb": (e.EV_KEY, e.BTN_BASE, 1),
-    "rt": (e.EV_KEY, e.BTN_BASE2, 1),
+    "lb": (e.EV_KEY, e.BTN_TL, 1),
+    "rb": (e.EV_KEY, e.BTN_TR, 1),
     # Menu-Pad
-    # "start": e.BTN_BASE3,
-    # "select": e.BTN_BASE3,
+    # "start": (e.EV_KEY, e.BTN_TL2, 1),
+    # "select": (e.EV_KEY, e.BTN_TR2, 1),
     # Stick Triggers
-    # "l3":e.BTN_BASE5,
-    # "r3": e.BTN_BASE6,
+    # "l3": (e.EV_KEY, e.BTN_SELECT, 1),
+    # "r3": (e.EV_KEY, e.BTN_START, 1),
 }
 
 
