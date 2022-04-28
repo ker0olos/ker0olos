@@ -24,9 +24,8 @@ ui = UInput(
             e.BTN_TR2,
             e.BTN_SELECT,
             e.BTN_START,
-            e.BTN_MODE,
-            e.BTN_THUMBL,
-            e.BTN_THUMBR,
+            # e.BTN_THUMBL,
+            # e.BTN_THUMBR,
         ],
         e.EV_ABS: [
             (e.ABS_X, AbsInfo(value=0, min=-1, max=1, fuzz=0, flat=0, resolution=0)),
@@ -48,28 +47,42 @@ ui = UInput(
     version=1,
 )
 
-
-bts = {
-    # Stick
-    "left": (e.EV_ABS, e.ABS_HAT0X, -1),
-    "right": (e.EV_ABS, e.ABS_HAT0X, 1),
-    "up": (e.EV_ABS, e.ABS_HAT0Y, -1),
-    "down": (e.EV_ABS, e.ABS_HAT0Y, 1),
-    # Action-pad
-    "a": (e.EV_KEY, e.BTN_A, 1),
-    "b": (e.EV_KEY, e.BTN_B, 1),
-    "x": (e.EV_KEY, e.BTN_X, 1),
-    "y": (e.EV_KEY, e.BTN_Y, 1),
-    # Triggers
-    "lb": (e.EV_KEY, e.BTN_TL, 1),
-    "rb": (e.EV_KEY, e.BTN_TR, 1),
-    # Menu-Pad
-    # "start": (e.EV_KEY, e.BTN_TL2, 1),
-    # "select": (e.EV_KEY, e.BTN_TR2, 1),
-    # Stick Triggers
-    # "l3": (e.EV_KEY, e.BTN_SELECT, 1),
-    # "r3": (e.EV_KEY, e.BTN_START, 1),
+slay_the_spire = {
+    "left": lambda: ui_press(e.EV_ABS, e.ABS_HAT0X, -1),
+    "right": lambda: ui_press(e.EV_ABS, e.ABS_HAT0X, 1),
+    "up": lambda: ui_press(e.EV_ABS, e.ABS_HAT0Y, -1),
+    "down": lambda: ui_press(e.EV_ABS, e.ABS_HAT0Y, 1),
+    #
+    "a": lambda: ui_press(e.EV_KEY, e.BTN_A, 1),
+    "use": lambda: ui_press(e.EV_KEY, e.BTN_A, 1),
+    "attack": lambda: ui_press(e.EV_KEY, e.BTN_A, 1),
+    #
+    "b": lambda: ui_press(e.EV_KEY, e.BTN_B, 1),
+    "back": lambda: ui_press(e.EV_KEY, e.BTN_B, 1),
+    #
+    "x": lambda: ui_press(e.EV_KEY, e.BTN_X, 1),
+    "potions": lambda: ui_press(e.EV_KEY, e.BTN_X, 1),
+    #
+    "y": lambda: ui_press(e.EV_KEY, e.BTN_Y, 1),
+    "end": lambda: ui_press(e.EV_KEY, e.BTN_Y, 1),
+    #
+    "lb": lambda: key_press("d"),
+    "deck": lambda: key_press("d"),
+    #
+    "lt": lambda: key_press("a"),
+    "pile": lambda: key_press("a"),
+    #
+    "rb": lambda: key_press("x"),
+    "exhaust": lambda: key_press("x"),
+    #
+    "rt": lambda: key_press("s"),
+    "discard": lambda: key_press("s"),
+    #
+    "start": lambda: key_press("m"),
+    "map": lambda: key_press("m"),
 }
+
+bts = slay_the_spire
 
 
 def probably(chance):
@@ -78,6 +91,15 @@ def probably(chance):
 
 def execute(*command):
     subprocess.Popen(command, cwd=os.getcwd())
+
+
+def ui_press(m, ev, v):
+    ui.write(m, ev, v)
+    ui.write(m, ev, 0)
+
+
+def key_press(name):
+    execute("xdotool", "key", name)
 
 
 def invert_screen(timeout):
@@ -91,17 +113,11 @@ def stop():
     ui.close()
 
 
-def press(ev):
-    ui.write(ev[0], ev[1], ev[2])
-    ui.write(ev[0], ev[1], 0)
-    ui.syn()
-
-
 def on_plays(message: Message):
     msg = message.text.lower()
 
     if msg in bts:
-        press(bts[msg])
+        bts[msg]()
 
     # elif msg == "screenshot":
     #     execute("screenshot-full.sh")
@@ -112,6 +128,8 @@ def on_plays(message: Message):
 
     else:
         return False
+
+    ui.syn()
 
     print(f"{message.author} -> {message.text}")
 
