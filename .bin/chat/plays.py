@@ -11,7 +11,7 @@ from .twitch import Message
 
 # https://www.kernel.org/doc/html/v5.17/input/gamepad.html
 
-ui = UInput(
+js = UInput(
     {
         e.EV_KEY: [
             e.BTN_A,
@@ -48,23 +48,23 @@ ui = UInput(
 )
 
 slay_the_spire = {
-    "left": lambda: ui_press(e.EV_ABS, e.ABS_HAT0X, -1),
-    "right": lambda: ui_press(e.EV_ABS, e.ABS_HAT0X, 1),
-    "up": lambda: ui_press(e.EV_ABS, e.ABS_HAT0Y, -1),
-    "down": lambda: ui_press(e.EV_ABS, e.ABS_HAT0Y, 1),
+    "left": lambda: js_press(e.EV_ABS, e.ABS_HAT0X, -1),
+    "right": lambda: js_press(e.EV_ABS, e.ABS_HAT0X, 1),
+    "up": lambda: js_press(e.EV_ABS, e.ABS_HAT0Y, -1),
+    "down": lambda: js_press(e.EV_ABS, e.ABS_HAT0Y, 1),
     #
-    "a": lambda: ui_press(e.EV_KEY, e.BTN_A, 1),
-    "use": lambda: ui_press(e.EV_KEY, e.BTN_A, 1),
-    "attack": lambda: ui_press(e.EV_KEY, e.BTN_A, 1),
+    "a": lambda: js_press(e.EV_KEY, e.BTN_A, 1),
+    "use": lambda: js_press(e.EV_KEY, e.BTN_A, 1),
+    "attack": lambda: js_press(e.EV_KEY, e.BTN_A, 1),
     #
-    "b": lambda: ui_press(e.EV_KEY, e.BTN_B, 1),
-    "back": lambda: ui_press(e.EV_KEY, e.BTN_B, 1),
+    "b": lambda: js_press(e.EV_KEY, e.BTN_B, 1),
+    "back": lambda: js_press(e.EV_KEY, e.BTN_B, 1),
     #
-    "x": lambda: ui_press(e.EV_KEY, e.BTN_X, 1),
-    "potions": lambda: ui_press(e.EV_KEY, e.BTN_X, 1),
+    "x": lambda: js_press(e.EV_KEY, e.BTN_X, 1),
+    "potions": lambda: js_press(e.EV_KEY, e.BTN_X, 1),
     #
-    "y": lambda: ui_press(e.EV_KEY, e.BTN_Y, 1),
-    "end": lambda: ui_press(e.EV_KEY, e.BTN_Y, 1),
+    "y": lambda: js_press(e.EV_KEY, e.BTN_Y, 1),
+    "end": lambda: js_press(e.EV_KEY, e.BTN_Y, 1),
     #
     "lb": lambda: key_press("d"),
     "deck": lambda: key_press("d"),
@@ -93,9 +93,9 @@ def execute(*command):
     subprocess.Popen(command, cwd=os.getcwd())
 
 
-def ui_press(m, ev, v):
-    ui.write(m, ev, v)
-    ui.write(m, ev, 0)
+def js_press(m, ev, v):
+    js.write(m, ev, v)
+    js.write(m, ev, 0)
 
 
 def key_press(name):
@@ -110,7 +110,7 @@ def invert_screen(timeout):
 
 def stop():
     execute("xrandr", "--output", "eDP-1-1", "--rotate", "normal")
-    ui.close()
+    js.close()
 
 
 def on_plays(message: Message):
@@ -129,7 +129,7 @@ def on_plays(message: Message):
     else:
         return False
 
-    ui.syn()
+    js.syn()
 
     print(f"{message.author} -> {message.text}")
 
