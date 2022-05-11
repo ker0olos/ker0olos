@@ -105,20 +105,17 @@ super + space
 ###  Media Keys  ###
 ####################
 
-XF86AudioRaiseVolume
-  volume.sh up
-
-XF86AudioLowerVolume
-  volume.sh down
-
-XF86AudioMute
+XF86Audio{Mute,Play,Pause}
   volume.sh mute
-	
-XF86MonBrightnessUp
-  light.sh up
 
-XF86MonBrightnessDown
-  light.sh down
+XF86Audio{Raise,Lower}Volume
+  volume.sh {up,down}
+
+XF86Audio{Next,Prev}
+  volume.sh {up,down}
+
+XF86MonBrightness{Up,Down}
+  light.sh {up,down}
 
 ####################
 ###  Equalizer  ###
