@@ -95,23 +95,27 @@ if not currently_playing or command == "skip" or command == "play":
     else:
         print("")
 else:
-    tid = currently_playing["item"]["id"]
+    if currently_playing["item"] is not None:
+        tid = currently_playing["item"]["id"]
 
-    if command == "title":
-        print(currently_playing["item"]["name"])
-    elif command == "toggle":
-        if currently_playing["is_playing"]:
-            spotify.pause_playback()
-        else:
-            spotify.start_playback()
-    elif command == "previous":
-        spotify.previous_track()
-    elif command == "state":
-        print("󰋑") if spotify.current_user_saved_tracks_contains(tracks=[tid])[
-            0
-        ] else print("󰋕")
-    elif command == "like":
-        if not spotify.current_user_saved_tracks_contains(tracks=[tid])[0]:
-            spotify.current_user_saved_tracks_add(tracks=[tid])
-        else:
-            spotify.current_user_saved_tracks_delete(tracks=[tid])
+        if command == "title":
+            print(currently_playing["item"]["name"])
+        elif command == "toggle":
+            if currently_playing["is_playing"]:
+                spotify.pause_playback()
+            else:
+                spotify.start_playback()
+        elif command == "previous":
+            spotify.previous_track()
+        elif command == "state":
+            print("󰋑") if spotify.current_user_saved_tracks_contains(tracks=[tid])[
+                0
+            ] else print("󰋕")
+        elif command == "like":
+            if not spotify.current_user_saved_tracks_contains(tracks=[tid])[0]:
+                spotify.current_user_saved_tracks_add(tracks=[tid])
+            else:
+                spotify.current_user_saved_tracks_delete(tracks=[tid])
+    else:
+        if command == "title":
+            print("Playing A Podcast")

@@ -105,14 +105,17 @@ super + space
 ###  Media Keys  ###
 ####################
 
-XF86Audio{Mute,Play,Pause}
+XF86AudioMute
   volume.sh mute
+
+XF86Audio{Play,Pause}
+  playerctl {play,pause}
 
 XF86Audio{Raise,Lower}Volume
   volume.sh {up,down}
 
 XF86Audio{Next,Prev}
-  volume.sh {up,down}
+  playerctl {next,previous}
 
 XF86MonBrightness{Up,Down}
   light.sh {up,down}
