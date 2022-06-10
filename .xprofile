@@ -3,16 +3,19 @@
 export EDITOR="nvim"
 export TERM="alacritty"
 
-export PATH="${PATH}:${HOME}/.bin:${HOME}/.local/bin"
+export PATH=$PATH:$HOME/.bin:$HOME/.local/bin
 
-export CXX=/usr/bin/g++
+export CXX=/usr/bin/g++ 
 export CMAKE_CXX_COMPILER=/usr/bin/g++
 
-export XDG_CONFIG_HOME="${HOME}/.local/share"
-export XDG_CACHE_HOME="${HOME}/.cache"
-export XDG_CONFIG_HOME="${HOME}/.config"
+export XDG_CONFIG_HOME="$HOME/.local/share"
+export XDG_CACHE_HOME="$HOME/.cache"
+export XDG_CONFIG_HOME="$HOME/.config"
+
+eval "$(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh,gpg)"
+export SSH_AUTH_SOCK
 
 export "$(secrets)"
-export "$(dbus-launch)"
+#export "$(dbus-launch)"
 
 export QT_QPA_PLATFORMTHEME=gtk3

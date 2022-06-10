@@ -9,10 +9,6 @@ fi
 
 [ -f ~/.xprofile ] && . ~/.xprofile
 
-eval $(/usr/bin/gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
-
-export SSH_AUTH_SOCK
-
 xrandr --setprovideroutputsource modesetting NVIDIA-0
 xrandr --auto
 xrandr --dpi 96
@@ -23,6 +19,9 @@ xsetroot -cursor_name left_ptr &
 
 # map super keys to trigger when used alone
 xcape -e 'Super_L=Super_L|F1' &
+
+# turn on numlock
+numlockx on &
 
 # map Keypads to trigger some special keybindings
 #xcape -e 'KP_End=Super_L|Shift_L|1' &
@@ -49,10 +48,12 @@ picom --experimental-backends --backend glx -b &
 redshift -m randr &
 # network manager tray
 nm-applet &
+# bluetooth manager tray
+blueman-applet &
 # spotify daemon
-spotifyd &
+#spotifyd &
 # authentication agent
-/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+#/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon
 dunst &
 # window manager
