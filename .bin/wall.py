@@ -12,7 +12,7 @@ _MIN_VOTES = 50
 _MIN_WIDTH = 1366
 _MIN_HEIGHT = 768
 
-_BLACKLIST = ["Naruto", "Evangelion", "Bunny"]
+_BLACKLIST = ["Naruto", "Evangelion", "Genshin Impact", "Bunny"]
 
 # default subreddit
 SUBREDDIT = "Animewallpaper"
@@ -146,9 +146,9 @@ _POSTS = (
     _SUBREDDIT.search(query=QUERY, sort="hot", time_filter="year")
     if QUERY
     else _SUBREDDIT.hot(limit=20)
-)  # pylint: disable=line-too-long
+)
 
-for post in _POSTS:
+for post_index, post in enumerate(_POSTS):
     # skip posts with unconvincing number of up votes
     if post.score < _MIN_VOTES:
         # print('  - {} is not enough up votes.'.format(post.score))

@@ -13,6 +13,7 @@ if [[ $1 == "-u" ]]; then
 	dunstify -i "$2" "Your wallpaper" "<b>Just got updated</b>" -u low
 
 elif [[ $1 == "bookmark" ]]; then
+	mkdir -p  "${HOME}/Pictures/.wall/.bookmarks"
 	cp "${HOME}/Pictures/.wall/default" "${HOME}/Pictures/.wall/.bookmarks/$2"
 	echo "Bookmarked: \"$2\""
 
