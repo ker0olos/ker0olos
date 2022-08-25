@@ -1,24 +1,19 @@
 #!/bin/bash
 
-external_monitor_1=$(xrandr --query | grep 'VGA-1-1')
+external_monitor_1=$(xrandr --query | grep 'VGA-1-1')z
+
+xrandr --output eDP-1-1 --primary --mode 1366x768 --rotate normal
 
 if [[ ${external_monitor_1} == "VGA-1-1 connected"* ]]; then
 	echo "VGA Dual Monitor Detected."
-
-	xrandr --output eDP-1-1 --primary --mode 1366x768 --rotate normal
 	xrandr --output VGA-1-1 --mode 1280x1024 --rotate left --left-of eDP-1-1
 
-	bspc monitor eDP-1-1 -d I II III IV V
-	bspc monitor VGA-1-1 -d VI VII VIII IX
+	bspc monitor eDP-1-1 -d 1 2 3 4 5
+	bspc monitor VGA-1-1 -d 6 7 8 9
 
 	bspc monitor VGA-1-1 -s eDP-1-1
 else
-	echo "Single Monitor Detected."
-
-	xrandr --output VGA-1-1 --off
-	xrandr --output eDP-1-1 --primary --mode 1366x768 --rotate normal
-
-	bspc monitor eDP-1-1 -d I II III IV V VI VII VIII IX
+	bspc monitor -d 1 2 3 4 5 6 7 8 9
 fi
 
 # re-merge Xresources
