@@ -7,8 +7,7 @@ killall -q polybar
 while pgrep -u "${UID}" -x polybar >/dev/null; do sleep 1; done
 
 polybar date &
-polybar workspace &
-# polybar spotify &
+# polybar workspace &
+polybar spotify &
 polybar system &
 polybar stats &
-polybar tray &

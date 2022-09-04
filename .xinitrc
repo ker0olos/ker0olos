@@ -51,7 +51,7 @@ nm-applet &
 # bluetooth manager tray
 blueman-applet &
 # spotify daemon
-#spotifyd &
+start-spotifyd.sh &
 # authentication agent
 #/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon
