@@ -5,6 +5,7 @@ import sys
 import json
 import time
 import datetime
+from random import randint
 
 import spotipy
 
@@ -48,8 +49,32 @@ def update_cache():
         return cache
 
 
-def random_stat():
-    return "TODO"
+def random_stat(cache):
+    p, r = randint(0, 0), randint(0, 9)
+
+    # track = cache["top_tracks"]["items"][r]
+    artist = cache["top_artist"]["items"][r]["name"]
+
+    randomize = lambda a: a[randint(0, len(a) - 1)]
+    ordinal = (
+        lambda n: f'{n}{"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]}'
+    )  # https://stackoverflow.com/a/20007730/10336604
+
+    track_string = randomize(
+        [
+            f"{artist} is {ordinal(r+1)}?",
+            f"((( {artist} is {ordinal(r+1)} )))",
+            f">{artist} is {ordinal(r+1)}<",
+            f"Too much {artist}...",
+            f"{artist} is {ordinal(r+1)}!!!",
+            f"{artist} is {ordinal(r+1)}?",
+            f"In {ordinal(r+1)} place is... {artist}.",
+            f"{artist} is in {ordinal(r+1)} place.",
+        ]
+    )
+
+    if p == 0:
+        return track_string
 
 
 if __name__ == "__main__":
@@ -86,9 +111,11 @@ if __name__ == "__main__":
         sys.exit()
 
     if currently_playing is None:
+        cache = read_cache()
+
         match command:
             case "title":
-                print(random_stat())
+                print(random_stat(cache))
             case "toggle":
                 print("Getting recently played tracks")
                 recently_played = spotify.current_user_recently_played(limit=50)
