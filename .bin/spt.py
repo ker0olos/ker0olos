@@ -4,29 +4,18 @@ import os
 import sys
 
 import spotipy
-from spotipy.oauth2 import SpotifyOAuth
 
-playlists = [
-    "spotify:playlist:37i9dQZF1E35tuHOcRhgZZ",  # Daily Mix 1
-    "spotify:playlist:37i9dQZF1E3855z4z5OsPs",  # Daily Mix 2
-    "spotify:playlist:37i9dQZF1E39jZuNJB5bh7",  # Daily Mix 3
-    "spotify:playlist:37i9dQZF1DWZyonhntyFxW",  # Egyptian Rap
-    "spotify:playlist:37i9dQZF1DWV4t1PmvRVd9",  # Egyptian Indie
-    # "spotify:playlist:37i9dQZF1DX2siSxlNkZrf",  # Black Zone
-    # "spotify:playlist:37i9dQZEVXbsA9iS8lxmLk", # Release Radar
-    # "spotify:playlist:37i9dQZF1DWUQM3rmTXpBR", # Arab Indie
-]
-
-device_name = "Space"
 command = sys.argv[1] if len(sys.argv) > 1 else sys.exit()
+
+curr_name = "Space"
 
 try:
     spotify = spotipy.Spotify(
-        auth_manager=SpotifyOAuth(
+        auth_manager=spotipy.oauth2.SpotifyOAuth(
             client_id=os.environ["SPOTIFY_CLIENT_ID"],
             client_secret=os.environ["SPOTIFY_CLIENT_SECRET"],
             redirect_uri="http://localhost:8870/callback",
-            cache_path=os.environ["HOME"] + "/.spotify_cache",
+            cache_path=os.environ["HOME"] + "/sptpy_token.json",
             scope="user-read-playback-state,user-modify-playback-state,user-library-read,user-library-modify,user-read-recently-played",
         )
     )
@@ -40,15 +29,26 @@ if currently_playing is None:
     if command == "title":
         print("TODO - Show stats while idling")
     elif command == "toggle":
+        print("Getting recently played tracks")
+        recently_played = spotify.current_user_recently_played(limit=50)
+        recently_played_uris = list(
+            map(lambda v: v["track"]["uri"], recently_played["items"])
+        )
+
+        print(f"Looking for {curr_name}")
         devices = spotify.devices()["devices"]
         space_id = None
 
         for d in devices:
-            if d["name"] == device_name:
+            if d["name"] == curr_name:
                 space_id = d["id"]
                 break
 
-        spotify.start_playback(space_id, context_uri=playlists[3])
+        if space_id is None:
+            print(f"{curr_name} not found")
+            sys.exit()
+
+        spotify.start_playback(space_id, uris=recently_played_uris)
         spotify.repeat("context", space_id)
         spotify.shuffle(True, space_id)
     else:
