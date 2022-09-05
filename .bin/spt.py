@@ -50,31 +50,41 @@ def update_cache():
 
 
 def random_stat(cache):
-    p, r = randint(0, 0), randint(0, 9)
+    p, r = randint(0, 1), randint(0, 9)
 
-    # track = cache["top_tracks"]["items"][r]
-    artist = cache["top_artist"]["items"][r]["name"]
-
-    randomize = lambda a: a[randint(0, len(a) - 1)]
-    ordinal = (
-        lambda n: f'{n}{"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]}'
-    )  # https://stackoverflow.com/a/20007730/10336604
-
-    track_string = randomize(
-        [
-            f"{artist} is {ordinal(r+1)}?",
-            f"((( {artist} is {ordinal(r+1)} )))",
-            f">{artist} is {ordinal(r+1)}<",
-            f"Too much {artist}...",
-            f"{artist} is {ordinal(r+1)}!!!",
-            f"{artist} is {ordinal(r+1)}?",
-            f"In {ordinal(r+1)} place is... {artist}.",
-            f"{artist} is in {ordinal(r+1)} place.",
-        ]
+    track = cache["top_tracks"]["items"][r]["name"]
+    track_artist = " ft. ".join(
+        map(lambda a: a["name"], cache["top_tracks"]["items"][r]["artists"])
     )
 
-    if p == 0:
-        return track_string
+    # artist = cache["top_artist"]["items"][r]["name"]
+
+    randomize = lambda a: a[randint(0, len(a) - 1)]
+    # ordinal = (
+    #     lambda n: f'{n}{"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]}'
+    # )  # https://stackoverflow.com/a/20007730/10336604
+
+    track_string = randomize([f"{track} by {track_artist}"])
+
+    # artist_string = randomize(
+    #     [
+    #         f"{artist} is {ordinal(r+1)}?",
+    #         f"((( {artist} is {ordinal(r+1)} )))",
+    #         f">{artist} is {ordinal(r+1)}<",
+    #         f"Too much {artist}...",
+    #         f"{artist} is {ordinal(r+1)}!!!",
+    #         f"{artist} is {ordinal(r+1)}?",
+    #         f"In {ordinal(r+1)} place is... {artist}.",
+    #         f"{artist} is in {ordinal(r+1)} place.",
+    #     ]
+    # )
+
+    # if p == 0:
+    #     return artist_string
+    # elif p == 1:
+    #     return track_string
+
+    return track_string
 
 
 if __name__ == "__main__":
