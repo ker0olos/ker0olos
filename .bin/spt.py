@@ -1,6 +1,7 @@
 #!/bin/python
 
 import os
+import re
 import sys
 import json
 import time
@@ -8,6 +9,7 @@ import datetime
 from random import randint
 
 import spotipy
+import arabic_reshaper
 
 curr_name = "Space"
 curr_date = datetime.date.today().strftime("%d/%m/%Y")
@@ -49,12 +51,19 @@ def update_cache():
         return cache
 
 
+def wrapper(s):
+    if re.match(r"[\u0600-\u06FF]", s):
+        return arabic_reshaper.reshape(s)[::-1]
+
+    return s
+
+
 def random_stat(cache):
     p, r = randint(0, 1), randint(0, 9)
 
-    track = cache["top_tracks"]["items"][r]["name"]
+    track = wrapper(cache["top_tracks"]["items"][r]["name"])
     track_artist = " ft. ".join(
-        map(lambda a: a["name"], cache["top_tracks"]["items"][r]["artists"])
+        map(lambda a: wrapper(a["name"]), cache["top_tracks"]["items"][r]["artists"])
     )
 
     # artist = cache["top_artist"]["items"][r]["name"]
