@@ -39,8 +39,10 @@ def update_cache():
         cache = {"write_time": curr_date}
 
         # cache user top items
-        cache["top_tracks"] = spotify.current_user_top_tracks(limit=10)
-        cache["top_artist"] = spotify.current_user_top_artists(limit=10)
+        cache["top_tracks"] = spotify.current_user_top_tracks(
+            limit=10, time_range="short_term"
+        )
+        # cache["top_artist"] = spotify.current_user_top_artists(limit=10)
 
         # save the cache to disk
         f.write(json.dumps(cache))
