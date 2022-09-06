@@ -63,39 +63,20 @@ def randomize(a):
     return a[randint(0, len(a) - 1)]
 
 
-def ordinal(n):
-    # https://stackoverflow.com/a/20007730/10336604
-    return f'{n}{"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]}'
+# def ordinal(n):
+#     # https://stackoverflow.com/a/20007730/10336604
+#     return f'{n}{"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]}'
 
 
 def random_stat(cache):
-    p, r = randint(0, 1), randint(0, 9)
+    r = randint(0, 9)
 
-    # artist = cache["top_artist"]["items"][r]["name"]
     track = wrapper(cache["top_tracks"]["items"][r]["name"])
     track_artist = " ft. ".join(
         map(lambda a: wrapper(a["name"]), cache["top_tracks"]["items"][r]["artists"])
     )
 
     track_string = randomize([f"{track} by {track_artist}"])
-
-    # artist_string = randomize(
-    #     [
-    #         f"{artist} is {ordinal(r+1)}?",
-    #         f"((( {artist} is {ordinal(r+1)} )))",
-    #         f">{artist} is {ordinal(r+1)}<",
-    #         f"Too much {artist}...",
-    #         f"{artist} is {ordinal(r+1)}!!!",
-    #         f"{artist} is {ordinal(r+1)}?",
-    #         f"In {ordinal(r+1)} place is... {artist}.",
-    #         f"{artist} is in {ordinal(r+1)} place.",
-    #     ]
-    # )
-
-    # if p == 0:
-    #     return artist_string
-    # elif p == 1:
-    #     return track_string
 
     return track_string
 
@@ -171,7 +152,14 @@ if __name__ == "__main__":
 
             match command:
                 case "title":
-                    print(wrapper(currently_playing["item"]["name"]))
+                    track_name = wrapper(currently_playing["item"]["name"])
+                    artist_name = " ft. ".join(
+                        map(
+                            lambda a: wrapper(a["name"]),
+                            currently_playing["item"]["artists"],
+                        )
+                    )
+                    print(f"{track_name} by {artist_name}")
                 case "skip":
                     spotify.next_track()
                 case "toggle":
