@@ -7,6 +7,7 @@ import json
 import time
 import datetime
 from random import randint
+from subprocess import run
 
 import spotipy
 
@@ -140,6 +141,10 @@ if __name__ == "__main__":
 
                 if space_id is None:
                     print(f"{curr_name} not found")
+                    run(["systemctl", "restart", "spotifyd", "--user"])
+                    print("Trying again in 1 second...")
+                    time.sleep(1)
+                    run(["spt.py", "toggle"])
                     sys.exit()
 
                 spotify.start_playback(space_id, uris=recently_played_uris)

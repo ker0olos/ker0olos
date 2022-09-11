@@ -80,6 +80,10 @@ slay_the_spire = {
     #
     "start": lambda: key_press("m"),
     "map": lambda: key_press("m"),
+    #
+    "screenshot": lambda: execute("screenshot-full.sh"),
+    "invert": lambda: probably(100 / 100)
+    and asyncio.get_event_loop().run_in_executor(None, invert_controls),
 }
 
 bts = slay_the_spire
@@ -102,14 +106,17 @@ def key_press(name):
     execute("xdotool", "key", name)
 
 
-def invert_screen(timeout):
-    execute("xrandr", "--output", "eDP-1-1", "--rotate", "inverted")
-    time.sleep(timeout)
-    execute("xrandr", "--output", "eDP-1-1", "--rotate", "normal")
+def invert_controls():
+    def invert():
+        bts["left"], bts["right"] = bts["right"], bts["left"]
+        bts["up"], bts["down"] = bts["down"], bts["up"]
+
+    invert()
+    time.sleep(30)
+    invert()
 
 
 def stop():
-    execute("xrandr", "--output", "eDP-1-1", "--rotate", "normal")
     js.close()
 
 
@@ -118,18 +125,9 @@ def on_plays(message: Message):
 
     if msg in bts:
         bts[msg]()
-
-    # elif msg == "screenshot":
-    #     execute("screenshot-full.sh")
-
-    elif msg == "invert":
-        if probably(15 / 100):
-            asyncio.get_event_loop().run_in_executor(None, invert_screen, 30)
-
+        js.syn()
     else:
         return False
-
-    js.syn()
 
     print(f"{message.author} -> {message.text}")
 
