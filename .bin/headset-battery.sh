@@ -7,5 +7,5 @@ if [ -z "$percentage" ]; then
 else
 	percentage=$(echo "$percentage" | awk '{print substr($0,22,4) }')
     percentage=$(printf "%d\n" "$percentage")
-    echo "$percentage%%{T3}󰥰%{T-}"
+    echo "$percentage%%{T3}󰋋%{T-}"
 fi
