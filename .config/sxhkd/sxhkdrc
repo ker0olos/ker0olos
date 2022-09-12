@@ -115,7 +115,7 @@ XF86Audio{Raise,Lower}Volume
   volume.sh {up,down}
 
 XF86Audio{Next,Prev}
-  playerctl {next,previous}
+  volume.sh {up,down}
 
 XF86MonBrightness{Up,Down}
   light.sh {up,down}
