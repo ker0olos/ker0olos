@@ -51,7 +51,7 @@ nm-applet &
 # bluetooth manager tray
 blueman-applet &
 # authentication agent
-#/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon
 dunst &
 # window manager
