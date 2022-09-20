@@ -4,41 +4,41 @@
 
 source ~/.znap/zsh-snap/znap.zsh
 
-export HISTSIZE=200
+# setup zsh history
+
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=10000
+setopt SHARE_HISTORY
 
 # znap
 
-ZSH_AUTOSUGGEST_STRATEGY=(history)
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+
 znap source zsh-users/zsh-autosuggestions
-
 znap source zsh-users/zsh-syntax-highlighting
-znap source zsh-users/zsh-history-substring-search
-
+# znap source zsh-users/zsh-history-substring-search
 znap source marlonrichert/zsh-autocomplete
 
-# load ohmyzsh theme 
+znap prompt sindresorhus/pure
 
-znap source ohmyzsh/ohmyzsh lib/{git,theme-and-appearance}
-
-local resetColor="%{$reset_color%}"
-local prefix="▲"
-local dir="%{$fg_bold[white]%}%c$resetColor$resetColor"
-PROMPT='$prefix $dir $(git_prompt_info)'
-ZSH_THEME_GIT_PROMPT_PREFIX="at %{$fg_bold[white]%}"
-ZSH_THEME_GIT_PROMPT_SUFFIX="$resetColor "
-ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg_bold[red]%} ✖"
-ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg_bold[green]%} ✔"
-
-znap prompt
-
-# fix history-substring
-
-bindkey '^[[A' history-substring-search-up
-bindkey '^[[B' history-substring-search-down
+# load zeit 
+# znap source ohmyzsh/ohmyzsh lib/{git,theme-and-appearance}
+# local resetColor="%{$reset_color%}"
+# local prefix="▲"
+# local dir="%{$fg_bold[white]%}%c$resetColor$resetColor"
+# PROMPT='$prefix $dir $(git_prompt_info)'
+# ZSH_THEME_GIT_PROMPT_PREFIX="at %{$fg_bold[white]%}"
+# ZSH_THEME_GIT_PROMPT_SUFFIX="$resetColor "
+# ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg_bold[red]%} ✖"
+# ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg_bold[green]%} ✔"
+# znap prompt
 
 # native
 
 eval "$(zoxide init zsh --cmd cd)"
+
+# aliases
 
 alias xdg-open="~/.bin/xdg-open"
 alias rm="rip --graveyard /home/$USER/.local/share/Trash/files/"
