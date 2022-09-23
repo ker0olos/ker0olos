@@ -7,6 +7,8 @@ import json
 import time
 import datetime
 from random import randint
+from audioop import reverse
+from operator import contains
 from subprocess import run
 
 import spotipy
@@ -53,13 +55,33 @@ def update_cache():
         return cache
 
 
-def wrapper(s):
-    if re.match(r"[\u0600-\u06FF]", s):
-        import arabic_reshaper
+def get_title(track, artists):
+    import arabic_reshaper
 
-        return arabic_reshaper.reshape(s)[::-1]
+    global contains_ara
+    contains_ara = False
 
-    return s
+    def ara(s):
+        global contains_ara
+        contains_ara = True
+        return re.sub(
+            r"([\u0600-\u06FF]).+",
+            lambda a: arabic_reshaper.reshape(a.group(0))[::-1],
+            s,
+        )
+
+    track_name = ara(track)
+
+    artist_name = " ft. ".join(
+        map(
+            lambda a: ara(a["name"]),
+            artists,
+        )
+    )
+
+    return (
+        f"{track_name} by {artist_name}"
+    )
 
 
 def randomize(a):
@@ -69,19 +91,6 @@ def randomize(a):
 # def ordinal(n):
 #     # https://stackoverflow.com/a/20007730/10336604
 #     return f'{n}{"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4]}'
-
-
-def random_stat(cache):
-    r = randint(0, 9)
-
-    track = wrapper(cache["top_tracks"]["items"][r]["name"])
-    track_artist = " ft. ".join(
-        map(lambda a: wrapper(a["name"]), cache["top_tracks"]["items"][r]["artists"])
-    )
-
-    track_string = randomize([f"{track} by {track_artist}"])
-
-    return track_string
 
 
 if __name__ == "__main__":
@@ -122,7 +131,10 @@ if __name__ == "__main__":
 
         match command:
             case "title":
-                print(random_stat(cache))
+                r = randint(0, 9)
+                track = cache["top_tracks"]["items"][r]["name"]
+                artists = cache["top_tracks"]["items"][r]["artists"]
+                print(get_title(track, artists))
             case "toggle":
                 print("Getting recently played tracks")
                 recently_played = spotify.current_user_recently_played(limit=50)
@@ -159,14 +171,9 @@ if __name__ == "__main__":
 
             match command:
                 case "title":
-                    track_name = wrapper(currently_playing["item"]["name"])
-                    artist_name = " ft. ".join(
-                        map(
-                            lambda a: wrapper(a["name"]),
-                            currently_playing["item"]["artists"],
-                        )
-                    )
-                    print(f"{track_name} by {artist_name}")
+                    track = currently_playing["item"]["name"]
+                    artists = currently_playing["item"]["artists"]
+                    print(get_title(track, artists))
                 case "skip":
                     spotify.next_track()
                 case "toggle":
