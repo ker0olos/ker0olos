@@ -10,6 +10,7 @@ HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
 setopt SHARE_HISTORY
+FPATH=$FPATH:$HOME/.bin/_completions
 
 # znap
 
@@ -41,7 +42,6 @@ eval "$(zoxide init zsh --cmd cd)"
 # aliases
 
 alias xdg-open="~/.bin/xdg-open"
-alias rm="rip --graveyard /home/$USER/.local/share/Trash/files/"
 
 # startx
 

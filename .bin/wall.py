@@ -12,7 +12,7 @@ _MIN_VOTES = 50
 _MIN_WIDTH = 1366
 _MIN_HEIGHT = 768
 
-_BLACKLIST = ["Naruto", "Evangelion", "Genshin Impact", "Bunny"]
+_BLACKLIST = ["Naruto", "Evangelion", "Bunny"]
 
 # default subreddit
 SUBREDDIT = "Animewallpaper"

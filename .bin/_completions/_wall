@@ -1,0 +1,24 @@
+#compdef wall.sh
+
+_wall() {
+  # typeset -A opt_args
+  
+  # _arguments \
+  #   '-h[help]' \
+  #   '-s[silent]' \
+  #   '-v[verbose]' \
+  #   '-d[dry run]'
+
+  '_options'
+}
+
+
+_options() {
+    local -a options=( $( ls ${HOME}/Pictures/.wall/.bookmarks ) )
+
+    _describe 'available wallpapers' options
+
+    return 1
+}
+
+_wall "$@"
