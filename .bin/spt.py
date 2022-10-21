@@ -7,8 +7,6 @@ import json
 import time
 import datetime
 from random import randint
-from audioop import reverse
-from operator import contains
 from subprocess import run
 
 import spotipy
@@ -58,12 +56,7 @@ def update_cache():
 def get_title(track, artists):
     import arabic_reshaper
 
-    global contains_ara
-    contains_ara = False
-
     def ara(s):
-        global contains_ara
-        contains_ara = True
         return re.sub(
             r"([\u0600-\u06FF]).+",
             lambda a: arabic_reshaper.reshape(a.group(0))[::-1],
@@ -79,9 +72,7 @@ def get_title(track, artists):
         )
     )
 
-    return (
-        f"{track_name} by {artist_name}"
-    )
+    return f"{track_name} by {artist_name}"
 
 
 def randomize(a):
