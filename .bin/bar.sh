@@ -8,6 +8,6 @@ while pgrep -u "${UID}" -x polybar >/dev/null; do sleep 1; done
 
 polybar date &
 polybar workspace &
-polybar spotify &
+# polybar spotify &
 polybar system &
 polybar stats &

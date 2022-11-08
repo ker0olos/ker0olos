@@ -11,14 +11,15 @@ if [[ $1 == "-u" ]]; then
 
 	# sent a notification with dunst with a preview of the wallpaper
 	dunstify -i "$2" "Your wallpaper" "<b>Just got updated</b>" -u low
-elif [[ $1 == "bookmark" ]]; then
-	mkdir -p  "${HOME}/Pictures/.wall/.bookmarks"
-	cp "${HOME}/Pictures/.wall/default" "${HOME}/Pictures/.wall/.bookmarks/$2"
-	echo "Bookmarked: \"$2\""
+elif [[ -z "$1" ]]; then
+	sh -c "$(cat "${HOME}"/Pictures/.wall/default)"
 else
 	if [[ -f "${HOME}/Pictures/.wall/.bookmarks/$1" ]]; then
 		cp "${HOME}/Pictures/.wall/.bookmarks/$1" "${HOME}/Pictures/.wall/default"
+		sh -c "$(cat "${HOME}"/Pictures/.wall/default)"
+	else
+		mkdir -p "${HOME}/Pictures/.wall/.bookmarks"
+		cp "${HOME}/Pictures/.wall/default" "${HOME}/Pictures/.wall/.bookmarks/$1"
+		echo "Bookmarked: \"$1\""
 	fi
-
-	sh -c "$(cat "${HOME}"/Pictures/.wall/default)"
 fi
