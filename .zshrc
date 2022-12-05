@@ -38,6 +38,7 @@ znap prompt sindresorhus/pure
 # native
 
 eval "$(zoxide init zsh --cmd cd)"
+eval $(thefuck --alias)
 
 # aliases
 

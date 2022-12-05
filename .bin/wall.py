@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# TODO somehow find a way to bookmark photos automatically
+
 import os
 import sys
 import urllib
@@ -68,9 +70,9 @@ def resolve_url(post):
             return []
 
 
-def process_image(title, length, index, filename, url):
-    if not os.path.isfile(filename):
-        urllib.request.urlretrieve(url, filename)
+def process_image(title, length, index, filename, ext, url):
+    if not os.path.isfile(filename + ext):
+        urllib.request.urlretrieve(url, filename + ext)
 
     print("\n" + title + "\n")
 
@@ -88,18 +90,18 @@ def process_image(title, length, index, filename, url):
     if length > 1:
         print(" {} left in this collection.".format(length))
 
-    with Image.open(filename) as img:
-        # image is in protrait
+    with Image.open(filename + ext) as img:
+        # image is in portrait
         if img.size[0] < img.size[1]:
             if "-l" not in sys.argv:
                 resize_image(img, filename)
-                subprocess.Popen(["wall.sh", "-u", filename + "_landscape", filename])
+                subprocess.Popen(["wall.sh", "-u", filename + "_landscape.png", filename + ext])
                 return input(f"Do you want to keep going? {CHOICES}: ")
             else:
                 return "f"
         # image is in landscape
         else:
-            subprocess.Popen(["wall.sh", "-u", filename])
+            subprocess.Popen(["wall.sh", "-u", filename + ext])
             return input(f"Do you want to keep going? {CHOICES}: ")
 
 
@@ -125,7 +127,7 @@ def resize_image(img, filename):
     background_copy.paste(copy, box=copy_postion)
 
     # save the new one image
-    background_copy.save(fp=filename + "_landscape", format="png")
+    background_copy.save(fp=filename + "_landscape.png", format="png")
 
 
 INDEX = 0
@@ -161,6 +163,9 @@ for post_index, post in enumerate(_POSTS):
     for i, obj in enumerate(data):
         [item_id, url] = obj.values()
 
+        path = urllib.parse.urlparse(url).path
+        ext = os.path.splitext(path)[1]
+
         filename = os.path.join(_CACHE_DIRECTORY, item_id)
 
         # skip blacklisted terms
@@ -168,13 +173,13 @@ for post_index, post in enumerate(_POSTS):
             continue
 
         # skip used images
-        if os.path.isfile(filename):
+        if os.path.isfile(filename+ ext):
             # print('  - already used before')
             continue
 
-        user_input = process_image(post.title, len(data) - 1 - i, INDEX, filename, url)
+        user_input = process_image(post.title, len(data) - 1 - i, INDEX, filename, ext, url)
 
-        HISTORY.append((post.title, filename))
+        HISTORY.append((post.title, filename, ext))
 
         # skip the collection
         if user_input.lower() == "s":
@@ -189,7 +194,7 @@ for post_index, post in enumerate(_POSTS):
 
             while INDEX < len(HISTORY):
                 user_input = process_image(
-                    HISTORY[INDEX][0], 0, INDEX, HISTORY[INDEX][1], None
+                    HISTORY[INDEX][0], 0, INDEX, HISTORY[INDEX][1], HISTORY[INDEX][2], None
                 )
 
                 if user_input.lower() == "f":
@@ -197,8 +202,10 @@ for post_index, post in enumerate(_POSTS):
                 elif user_input.lower() == "p" and INDEX > 0:
                     INDEX -= 1
                 else:
+                    print(url)
                     post.upvote()
                     sys.exit()
         else:
+            print(url)
             post.upvote()
             sys.exit()
