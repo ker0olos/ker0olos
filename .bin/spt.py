@@ -7,9 +7,11 @@ import json
 import time
 import datetime
 from random import randint
-from subprocess import run
 
 import spotipy
+
+# from subprocess import run
+
 
 curr_name = "Space"
 curr_date = datetime.date.today().strftime("%d/%m/%Y")
@@ -135,24 +137,31 @@ if __name__ == "__main__":
 
                 print(f"Looking for {curr_name}")
                 devices = spotify.devices()["devices"]
-                space_id = None
+                # space_id = None
 
-                for d in devices:
-                    if d["name"] == curr_name:
-                        space_id = d["id"]
-                        break
+                # for d in devices:
+                #     if d["name"] == curr_name:
+                #         space_id = d["id"]
+                #         break
 
-                if space_id is None:
-                    print(f"{curr_name} not found")
-                    run(["systemctl", "restart", "spotifyd", "--user"])
-                    print("Trying again in 1 second...")
-                    time.sleep(1)
-                    run(["spt.py", "toggle"])
-                    sys.exit()
+                # if space_id is None:
+                #     print(f"{curr_name} not found")
+                #     run(["systemctl", "restart", "spotifyd", "--user"])
+                #     print("Trying again in 1 second...")
+                #     time.sleep(1)
+                #     run(["spt.py", "toggle"])
+                #     sys.exit()
 
-                spotify.start_playback(space_id, uris=recently_played_uris)
-                spotify.repeat("context", space_id)
-                spotify.shuffle(True, space_id)
+                # spotify.start_playback(space_id, uris=recently_played_uris)
+                # spotify.repeat("context", space_id)
+                # spotify.shuffle(True, space_id)
+
+                if not devices:
+                    print("No devices are online")
+                else:
+                    spotify.start_playback(devices[-1]["id"], uris=recently_played_uris)
+                    spotify.repeat("context", devices[-1]["id"])
+                    spotify.shuffle(True, devices[-1]["id"])
             case _:
                 print("")
     # something is currently playing
