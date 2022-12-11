@@ -35,8 +35,10 @@ picom --experimental-backends --backend glx -b &
 redshift -m randr &
 # network manager tray
 nm-applet &
+# kdeconnect tray
+kdeconnect-indicator &
 # bluetooth manager tray
-blueman-applet &
+# blueman-applet &
 # authentication agent
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 # notification daemon

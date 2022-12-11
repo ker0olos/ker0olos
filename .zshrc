@@ -9,6 +9,7 @@ source ~/.znap/zsh-snap/znap.zsh
 HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=10000
+
 setopt SHARE_HISTORY
 FPATH=$FPATH:$HOME/.bin/_completions
 
