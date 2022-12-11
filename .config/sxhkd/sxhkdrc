@@ -14,33 +14,33 @@ super + F1
 ###  BSP CLient  ###
 ####################
 
-# Send the window to a given destop
-super + {1-9}
-  bspc node -d '^{1-9}'
+# # Send the window to a given desktop
+# super + {1-9}
+#   bspc node -d '^{1-9}'
 
 # Scroll through desktops
 super + e
   bspc desktop -f next.occupied.local
 
 # Rearrange the current node
-super + {Left,Down,Up,Right}
-  bspc node -s {west,south,north,east}
+# super + {Left,Down,Up,Right}
+#   bspc node -s {west,south,north,east}
 
 # Scroll through nodes
-super + {s,w,a,d}
-  bspc node -f {south,north,west,east}.window
+# super + {s,w,a,d}
+#   bspc node -f {south,north,west,east}.window
 
 # Rotate current node
-super + r
-  bspc node @/ -R 90
+# super + r
+#   bspc node @/ -R 90
 
-# Fix the node opacity
-super + p
-  if [[ "$(xprop -id $(bspc query -N -n .local.focused) -notype _NET_WM_WINDOW_OPACITY)" == *"not found." ]]; then \
-    picom-trans -w "$(bspc query -N -n .local.focused)" -o 100; \
-  else \
-    picom-trans -w "$(bspc query -N -n .local.focused)" -d; \
-  fi
+# # Fix the node opacity
+# super + p
+#   if [[ "$(xprop -id "$(bspc query -N -n .local.focused)" -notype _NET_WM_WINDOW_OPACITY)" == *"not found." ]]; then \
+#     picom-trans -w "$(bspc query -N -n .local.focused)" -o 100; \
+#   else \
+#     picom-trans -w "$(bspc query -N -n .local.focused)" -d; \
+#   fi
 
 # Switch node between tiled and fullscreen
 super + f
@@ -50,21 +50,21 @@ super + f
     bspc node -t tiled; \
   fi
 
-# Switch node between pseudo and tiled
+# Switch node between tiled and pseudo
 super + t
-  if [ -z "$(bspc query -N -n .local.focused.pseudo_tiled)" ]; then \
+  if [ -z "$(bspc query -N -n .local.pseudo_tiled)" ]; then \
     bspc node -t pseudo_tiled; \
   else \
     bspc node -t tiled; \
   fi
 
 # (Un)hide node
-super + h
-  if [ -z "$(bspc query -N -n .local.hidden)" ]; then \
-    bspc node -g hidden; \
-  else \
-    bspc node "$(bspc query -N -n .local.hidden | tail -n1)" -g hidden=off; \
-  fi
+# super + h
+#   if [ -z "$(bspc query -N -n .local.hidden)" ]; then \
+#     bspc node -g hidden; \
+#   else \
+#     bspc node "$(bspc query -N -n .local.hidden | tail -n1)" -g hidden=off; \
+#   fi
 
 # Close node
 super + x

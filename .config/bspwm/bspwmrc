@@ -9,11 +9,13 @@ bspc config gapless_monocle      true
 
 bspc config pointer_follows_focus true
 
-bspc rule -a "Alacritty" state=pseudo_tiled follow=on
-
-bspc rule -a "Authy Desktop" state=pseudo_tiled rectangle=400x680+0+0
-
-bspc rule -a "Peek" state=floating rectangle=640x480+0+0
+###
+bspc config external_rules_command ~/.bin/external_rules_1.sh
+bspc subscribe node_remove | while read -r event
+do
+   external_rules_2.sh "$event"
+done &
+###
 
 # setup monitor
-dual_monitor
+dual_monitor &
