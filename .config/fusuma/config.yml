@@ -1,0 +1,20 @@
+plugin:
+  inputs:
+    libinput_command_input:
+      show-keycodes: true
+
+hold:
+  1:
+    sendkey: "LEFTMETA"
+  2:
+    sendkey: "LEFTMETA+Enter"
+
+swipe:
+  3:
+    left:
+      command: "bspc desktop -f prev.occupied.local"
+    right:
+      command: "bspc desktop -f next.occupied.local"
+
+threshold:
+  swipe: 0.5
