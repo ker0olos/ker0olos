@@ -9,6 +9,7 @@ export CXX=/usr/bin/g++
 export CMAKE_CXX_COMPILER=/usr/bin/g++
 export PROTOC=/usr/bin/protoc
 
+export XDG_CURRENT_DESKTOP="bspwm"
 export XDG_CONFIG_HOME="$HOME/.local/share"
 export XDG_CACHE_HOME="$HOME/.cache"
 export XDG_CONFIG_HOME="$HOME/.config"

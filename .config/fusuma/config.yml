@@ -4,10 +4,8 @@ plugin:
       show-keycodes: true
 
 hold:
-  1:
-    sendkey: "LEFTMETA"
   2:
-    sendkey: "LEFTMETA+Enter"
+    sendkey: "LEFTMETA"
 
 swipe:
   3:

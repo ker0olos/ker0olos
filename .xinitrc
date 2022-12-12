@@ -32,11 +32,11 @@ exec sxhkd &
 # compositor
 picom --experimental-backends --backend glx -b &
 # redshift
-redshift -m randr &
+# redshift -m randr &
+# touchpad gestures
+fusuma &
 # network manager tray
 nm-applet &
-# kdeconnect tray
-kdeconnect-indicator &
 # bluetooth manager tray
 # blueman-applet &
 # authentication agent
