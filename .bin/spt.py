@@ -1,11 +1,11 @@
 #!/bin/python
 
+import datetime
+import json
 import os
 import re
 import sys
-import json
 import time
-import datetime
 from random import randint
 
 import spotipy
@@ -115,8 +115,15 @@ if __name__ == "__main__":
         )
 
         currently_playing = spotify.currently_playing()
-    except Exception:
-        print("No internet connection") if command == "title" else print("")
+    except Exception as err:
+        match command:
+            case "title":
+                print("No internet connection")
+            case "state":
+                print("")
+            case _:
+                print(err)
+
         sys.exit()
 
     if currently_playing is None:

@@ -50,21 +50,21 @@ super + f
     bspc node -t tiled; \
   fi
 
-# Switch node between tiled and pseudo
-super + t
-  if [ -z "$(bspc query -N -n .local.pseudo_tiled)" ]; then \
-    bspc node -t pseudo_tiled; \
-  else \
-    bspc node -t tiled; \
-  fi
+# Switch node between pseudo and tiled
+# super + t
+#   if [ -z "$(bspc query -N -n .local.focused.pseudo_tiled)" ]; then \
+#     bspc node -t pseudo_tiled; \
+#   else \
+#     bspc node -t tiled; \
+#   fi
 
 # (Un)hide node
-# super + h
-#   if [ -z "$(bspc query -N -n .local.hidden)" ]; then \
-#     bspc node -g hidden; \
-#   else \
-#     bspc node "$(bspc query -N -n .local.hidden | tail -n1)" -g hidden=off; \
-#   fi
+super + h
+   if [ -z "$(bspc query -N -n .local.hidden)" ]; then \
+     bspc node -g hidden; \
+   else \
+     bspc node "$(bspc query -N -n .local.hidden | tail -n1)" -g hidden=off; \
+   fi
 
 # Close node
 super + x

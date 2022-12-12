@@ -17,6 +17,7 @@ export XDG_CONFIG_HOME="$HOME/.config"
 eval "$(gnome-keyring-daemon --start --components=pkcs11,secrets,ssh,gpg)"
 export SSH_AUTH_SOCK
 
-export "$(secrets)"
+# shellcheck disable=SC2046
+export $(secrets)
 
 export QT_QPA_PLATFORMTHEME=gtk3

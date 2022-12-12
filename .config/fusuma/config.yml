@@ -3,9 +3,9 @@ plugin:
     libinput_command_input:
       show-keycodes: true
 
-hold:
-  2:
-    sendkey: "LEFTMETA"
+# hold:
+#   2:
+#     sendkey: "LEFTMETA"
 
 swipe:
   3:

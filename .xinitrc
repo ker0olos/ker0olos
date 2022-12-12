@@ -9,11 +9,10 @@ fi
 
 [ -f ~/.xprofile ] && . ~/.xprofile
 
-# xrandr --setprovideroutputsource modesetting NVIDIA-0
 xrandr --auto
 xrandr --dpi 96
 
-xrdb -merge ~/.Xresources 
+# xrandr --setprovideroutputsource modesetting NVIDIA-0
 
 xsetroot -cursor_name left_ptr &
 
@@ -27,21 +26,36 @@ numlockx on &
 xinput set-prop "AlpsPS/2 ALPS GlidePoint" "libinput Natural Scrolling Enabled" 1
 xinput set-prop "AlpsPS/2 ALPS GlidePoint" "libinput Tapping Enabled" 1
 
+#################
+# auto start
+#################
+
 # keybindings
 exec sxhkd &
+
 # compositor
 picom --experimental-backends --backend glx -b &
+
 # redshift
-# redshift -m randr &
+redshift -m randr &
+
 # touchpad gestures
 fusuma &
+
 # network manager tray
 nm-applet &
+
 # bluetooth manager tray
 # blueman-applet &
+
 # authentication agent
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+
 # notification daemon
 dunst &
+
+# discord
+discord --start-minimized &
+
 # window manager
 exec bspwm

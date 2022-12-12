@@ -9,13 +9,14 @@ bspc config gapless_monocle      true
 
 bspc config pointer_follows_focus true
 
-###
+### mimic https://github.com/jbuchermn/newm
 bspc config external_rules_command ~/.bin/external_rules_1.sh
+###
+
 bspc subscribe node_remove | while read -r event
 do
    external_rules_2.sh "$event"
 done &
-###
 
 # setup monitor
-dual_monitor &
+setup_monitors &
