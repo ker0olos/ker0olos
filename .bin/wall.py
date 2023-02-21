@@ -3,9 +3,9 @@
 # TODO somehow find a way to bookmark photos automatically
 
 import os
+import subprocess
 import sys
 import urllib
-import subprocess
 
 import praw
 from PIL import Image, ImageFilter
@@ -95,7 +95,9 @@ def process_image(title, length, index, filename, ext, url):
         if img.size[0] < img.size[1]:
             if "-l" not in sys.argv:
                 resize_image(img, filename)
-                subprocess.Popen(["wall.sh", "-u", filename + "_landscape.png", filename + ext])
+                subprocess.Popen(
+                    ["wall.sh", "-u", filename + "_landscape.png", filename + ext]
+                )
                 return input(f"Do you want to keep going? {CHOICES}: ")
             else:
                 return "f"
@@ -118,6 +120,8 @@ def resize_image(img, filename):
     background_copy = img.resize(
         size=(_MIN_WIDTH, _MIN_HEIGHT), resample=Image.Resampling.LANCZOS
     )
+
+    background_copy = background_copy.convert("RGBA")
 
     # blur the background copy of the image
     background_copy = background_copy.filter(ImageFilter.GaussianBlur(radius=25))
@@ -173,11 +177,13 @@ for post_index, post in enumerate(_POSTS):
             continue
 
         # skip used images
-        if os.path.isfile(filename+ ext):
+        if os.path.isfile(filename + ext):
             # print('  - already used before')
             continue
 
-        user_input = process_image(post.title, len(data) - 1 - i, INDEX, filename, ext, url)
+        user_input = process_image(
+            post.title, len(data) - 1 - i, INDEX, filename, ext, url
+        )
 
         HISTORY.append((post.title, filename, ext))
 
@@ -194,7 +200,12 @@ for post_index, post in enumerate(_POSTS):
 
             while INDEX < len(HISTORY):
                 user_input = process_image(
-                    HISTORY[INDEX][0], 0, INDEX, HISTORY[INDEX][1], HISTORY[INDEX][2], None
+                    HISTORY[INDEX][0],
+                    0,
+                    INDEX,
+                    HISTORY[INDEX][1],
+                    HISTORY[INDEX][2],
+                    None,
                 )
 
                 if user_input.lower() == "f":
