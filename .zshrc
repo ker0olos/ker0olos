@@ -1,6 +1,6 @@
 [[ -f ~/.znap/zsh-snap/znap.zsh ]] ||
     git clone --depth 1 https://github.com/ealap/zsh-snap.git --branch Fix-202 ~/.znap/zsh-snap
-        #https://github.com/marlonrichert/zsh-snap.git \
+        # https://github.com/marlonrichert/zsh-snap.git
 
 source ~/.znap/zsh-snap/znap.zsh
 
@@ -23,8 +23,8 @@ znap source zsh-users/zsh-syntax-highlighting
 # znap source zsh-users/zsh-history-substring-search
 znap source marlonrichert/zsh-autocomplete
 
-#znap prompt sindresorhus/pure
-znap prompt spaceship-prompt/spaceship-prompt
+znap prompt sindresorhus/pure
+# znap prompt spaceship-prompt/spaceship-prompt
 
 # load zeit 
 # znap source ohmyzsh/ohmyzsh lib/{git,theme-and-appearance}
