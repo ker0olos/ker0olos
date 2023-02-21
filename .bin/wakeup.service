@@ -5,7 +5,7 @@ WantedBy=basic.target suspend.target hibernate.target
  
  
 [Service]
-ExecStart=killall chrome
+ExecStart=
 #User
 #Environment=
  
