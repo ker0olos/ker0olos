@@ -41,6 +41,15 @@ _SUBREDDIT = REDDIT.subreddit(SUBREDDIT)
 # where to store cached images
 _CACHE_DIRECTORY = os.path.expanduser("~/Pictures/.wall/")
 
+x = "8"
+y = "50"
+width = "450"
+height = "150"
+subprocess.Popen(["bspc", "node", "focused", "-t", "floating"])
+subprocess.Popen(
+    ["xdotool", "getactivewindow", "windowsize", width, height, "windowmove", x, y]
+)
+
 # exits if the subreddit doesn't exist
 try:
     REDDIT.subreddit(SUBREDDIT).id
@@ -138,15 +147,6 @@ INDEX = 0
 
 HISTORY = []
 
-x = "8"
-y = "50"
-width = "450"
-height = "150"
-
-subprocess.Popen(["bspc", "node", "focused", "-t", "floating"])
-subprocess.Popen(
-    ["xdotool", "getactivewindow", "windowsize", width, height, "windowmove", x, y]
-)
 
 _POSTS = (
     _SUBREDDIT.search(query=QUERY, sort="hot", time_filter="year")
