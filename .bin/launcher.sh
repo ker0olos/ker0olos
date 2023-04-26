@@ -1,3 +1,10 @@
 #!/bin/bash
 
-rofi -no-lazy-grab -show drun -theme ~/.config/rofi/launchers/blurry.rasi
+theme='style-1'
+
+dir="$HOME/.config/rofi/launchers/type-3"
+
+## Run
+rofi \
+    -show drun \
+    -theme ${dir}/${theme}.rasi
