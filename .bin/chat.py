@@ -7,11 +7,10 @@ import time
 import asyncio
 import datetime
 
-from emoji import demojize
-
 import chat.twitch as twitch
 import chat.youtube as youtube
 from chat import Message, plays, on_plays
+from emoji import demojize
 
 heatmap = {}
 

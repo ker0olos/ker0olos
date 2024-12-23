@@ -1,10 +1,9 @@
 #!/usr/bin/python3
 
-# TODO somehow find a way to bookmark photos automatically
-
 import os
 import sys
 import urllib
+import platform
 import subprocess
 
 import praw
@@ -95,15 +94,26 @@ def process_image(title, length, index, filename, ext, url):
         if img.size[0] < img.size[1]:
             if "-l" not in sys.argv:
                 resize_image(img, filename)
+                wallpaper_script = (
+                    "wall.ps1" if platform.system() == "Windows" else "wall.sh"
+                )
                 subprocess.Popen(
-                    ["wall.sh", "-u", filename + "_landscape.png", filename + ext]
+                    [
+                        wallpaper_script,
+                        "-u",
+                        filename + "_landscape.png",
+                        filename + ext,
+                    ]
                 )
                 return input(f"Do you want to keep going? {CHOICES}: ")
             else:
                 return "f"
         # image is in landscape
         else:
-            subprocess.Popen(["wall.sh", "-u", filename + ext])
+            wallpaper_script = (
+                "wall.ps1" if platform.system() == "Windows" else "wall.sh"
+            )
+            subprocess.Popen([wallpaper_script, "-u", filename + ext])
             return input(f"Do you want to keep going? {CHOICES}: ")
 
 
