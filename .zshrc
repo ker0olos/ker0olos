@@ -18,6 +18,7 @@ znap source zsh-users/zsh-syntax-highlighting
 source ~/plugins/zsh-autocomplete/zsh-autocomplete.plugin.zsh
 
 # znap prompt sindresorhus/pure
+# znap prompt spaceship-prompt/spaceship-prompt
 
 # load zeit 
 znap source ohmyzsh/ohmyzsh lib/{git,theme-and-appearance}
@@ -39,10 +40,10 @@ eval "$(atuin init zsh)"
 
 # aliases
 
-alias xdg-open="~/.bin/xdg-open"
+# alias xdg-open="~/.bin/xdg-open"
 
 # startx
 
-if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
-  exec startx
-fi
+#if [ -z "${DISPLAY}" ] && [ "${XDG_VTNR}" -eq 1 ]; then
+#  exec startx
+#fi

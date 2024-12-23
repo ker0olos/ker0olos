@@ -1,18 +1,18 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 # TODO somehow find a way to bookmark photos automatically
 
 import os
-import subprocess
 import sys
 import urllib
+import subprocess
 
 import praw
 from PIL import Image, ImageFilter
 
 _MIN_VOTES = 50
-_MIN_WIDTH = 1366
-_MIN_HEIGHT = 768
+_MIN_WIDTH = 2560
+_MIN_HEIGHT = 1440
 
 _BLACKLIST = ["Naruto", "Evangelion", "Bunny"]
 
@@ -40,15 +40,6 @@ _SUBREDDIT = REDDIT.subreddit(SUBREDDIT)
 
 # where to store cached images
 _CACHE_DIRECTORY = os.path.expanduser("~/Pictures/.wall/")
-
-x = "8"
-y = "50"
-width = "450"
-height = "150"
-subprocess.Popen(["bspc", "node", "focused", "-t", "floating"])
-subprocess.Popen(
-    ["xdotool", "getactivewindow", "windowsize", width, height, "windowmove", x, y]
-)
 
 # exits if the subreddit doesn't exist
 try:
