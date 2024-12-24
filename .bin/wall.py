@@ -23,10 +23,10 @@ QUERY = ""
 
 REDDIT = praw.Reddit(
     user_agent="wall.py",
-    client_id=os.environ["REDDIT_CLIENT_ID"],
-    client_secret=os.environ["REDDIT_CLIENT_SECRET"],
-    username=os.environ["REDDIT_USERNAME"],
-    password=os.environ["REDDIT_PASSWORD"],
+    client_id="hdi54nFW7U2Pyq9a3nuuIQ",
+    client_secret="n9uIkJ3sbKKyS5tXSuxxetiwnOqILw",
+    username="ker0olos",
+    password="z%DmuQgyd!TWWfw2",
 )
 
 # check if a subreddit and/or a search query are specified
@@ -52,6 +52,11 @@ except Exception:
 print("\n--------------------------------------------")
 print(("r/{} ~ {}" if QUERY else "r/{}").format(SUBREDDIT, QUERY))
 print("--------------------------------------------\n")
+
+
+wallpaper_script = wallpaper_script = (
+    ["powershell.exe", "-File", "C:\\Users\\kerol\\Documents\\.bin\\wall.ps1"] if platform.system() == "Windows" else ["wall.sh"]
+)
 
 
 def resolve_url(post):
@@ -94,13 +99,8 @@ def process_image(title, length, index, filename, ext, url):
         if img.size[0] < img.size[1]:
             if "-l" not in sys.argv:
                 resize_image(img, filename)
-                wallpaper_script = (
-                    "wall.ps1" if platform.system() == "Windows" else "wall.sh"
-                )
                 subprocess.Popen(
-                    [
-                        wallpaper_script,
-                        "-u",
+                    wallpaper_script + [
                         filename + "_landscape.png",
                         filename + ext,
                     ]
@@ -110,10 +110,7 @@ def process_image(title, length, index, filename, ext, url):
                 return "f"
         # image is in landscape
         else:
-            wallpaper_script = (
-                "wall.ps1" if platform.system() == "Windows" else "wall.sh"
-            )
-            subprocess.Popen([wallpaper_script, "-u", filename + ext])
+            subprocess.Popen(wallpaper_script + (filename + ext))
             return input(f"Do you want to keep going? {CHOICES}: ")
 
 
