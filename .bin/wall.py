@@ -23,10 +23,10 @@ QUERY = ""
 
 REDDIT = praw.Reddit(
     user_agent="wall.py",
-    client_id="hdi54nFW7U2Pyq9a3nuuIQ",
-    client_secret="n9uIkJ3sbKKyS5tXSuxxetiwnOqILw",
-    username="ker0olos",
-    password="z%DmuQgyd!TWWfw2",
+    client_id=os.environ["REDDIT_CLIENT_ID"],
+    client_secret=os.environ["REDDIT_CLIENT_SECRET"],
+    username=os.environ["REDDIT_USERNAME"],
+    password=os.environ["REDDIT_PASSWORD"],
 )
 
 # check if a subreddit and/or a search query are specified
