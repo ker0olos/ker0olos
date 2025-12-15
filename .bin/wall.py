@@ -5,6 +5,7 @@ import os
 import platform
 import subprocess
 import sys
+import threading
 import urllib
 import urllib.request
 
@@ -324,58 +325,47 @@ for post_index, post in enumerate(_POSTS):
 
         images_to_display.append((item_id, post, preview, url, filename, ext))
 
-        async def download_image(url, filename, ext):
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as resp:
-                    if resp.status == 200:
-                        with open(filename + ext, "wb") as f:
-                            f.write(await resp.read())
 
-        async def main():
-            tasks = []
-
-            for i in images_to_display:
-                item_id, post, preview, url, filename, ext = i
-                # print(preview)
-                cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
-                task = asyncio.create_task(
-                    download_image(preview, cached_filename, ext)
-                )
-                tasks.append(task)
-
-            await asyncio.gather(*tasks)
-
-        asyncio.run(main())
+async def download_image(url, filename, ext):
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            if resp.status == 200:
+                with open(filename + ext, "wb") as f:
+                    f.write(await resp.read())
 
 
-with dpg.window(tag="wall.py"):
-    # Create a table with 3 columns for the grid layout
-    with dpg.table(
-        header_row=False,
-        borders_innerH=False,
-        borders_outerH=False,
-        borders_innerV=False,
-        borders_outerV=False,
-        policy=dpg.mvTable_SizingFixedFit,
-    ):
-        # Define 3 columns with equal width
-        dpg.add_table_column()
-        dpg.add_table_column()
-        dpg.add_table_column()
+async def download_all_images():
+    tasks = []
+    for i in images_to_display:
+        item_id, post, preview, url, filename, ext = i
+        cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
+        task = asyncio.create_task(
+            download_image(preview, cached_filename, ext)
+        )
+        tasks.append(task)
+    await asyncio.gather(*tasks)
 
-        # Display images in rows with 3 columns each
-        for i in range(0, len(images_to_display), 3):
-            with dpg.table_row():
-                # Add up to 3 images in this row
-                for j in range(3):
-                    if i + j < len(images_to_display):
-                        item_id, post, preview, url, filename, ext = images_to_display[
-                            i + j
-                        ]
 
-                        cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
+def load_and_display_images():
+    """Load images after they're downloaded and update the UI"""
+    # Remove loading indicator
+    if dpg.does_item_exist("loading_text"):
+        dpg.delete_item("loading_text")
+    
+    # Display images in rows with 3 columns each
+    for i in range(0, len(images_to_display), 3):
+        with dpg.table_row(parent="image_table"):
+            # Add up to 3 images in this row
+            for j in range(3):
+                if i + j < len(images_to_display):
+                    item_id, post, preview, url, filename, ext = images_to_display[
+                        i + j
+                    ]
 
-                        with dpg.table_cell():
+                    cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
+
+                    with dpg.table_cell():
+                        try:
                             # Load and display image
                             width, height, _, data = dpg.load_image(
                                 cached_filename + ext
@@ -412,10 +402,46 @@ with dpg.window(tag="wall.py"):
                                         user_data=(filename, ext, url, post),
                                         width=150,
                                     )
+                        except Exception as e:
+                            dpg.add_text(f"Failed to load image: {e}")
+
+
+def download_images_thread():
+    """Run async download in a separate thread"""
+    asyncio.run(download_all_images())
+    # After download completes, update UI in main thread
+    load_and_display_images()
+
+
+# Create UI window with loading state
+with dpg.window(tag="wall.py"):
+    dpg.add_text("Loading wallpapers...", tag="loading_text")
+    dpg.add_loading_indicator(style=1, tag="loading_indicator")
+    
+    # Create a table with 3 columns for the grid layout
+    with dpg.table(
+        tag="image_table",
+        header_row=False,
+        borders_innerH=False,
+        borders_outerH=False,
+        borders_innerV=False,
+        borders_outerV=False,
+        policy=dpg.mvTable_SizingFixedFit,
+    ):
+        # Define 3 columns with equal width
+        dpg.add_table_column()
+        dpg.add_table_column()
+        dpg.add_table_column()
+
 
 dpg.create_viewport(title="wall.py")
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.set_primary_window("wall.py", True)
+
+# Start downloading images in background thread
+thread = threading.Thread(target=download_images_thread, daemon=True)
+thread.start()
+
 dpg.start_dearpygui()
 dpg.destroy_context()
