@@ -3,6 +3,7 @@
 import asyncio
 import os
 import platform
+import random
 import subprocess
 import sys
 import threading
@@ -34,8 +35,8 @@ _DUAL_HEIGHT = max(_PORTRAIT_HEIGHT, _MIN_HEIGHT)
 
 _BLACKLIST = ["Naruto", "Evangelion", "Bunny"]
 
-# default subreddit
-SUBREDDIT = "Animewallpaper"
+# List of subreddits to fetch wallpapers from
+SUBREDDITS = ["Animewallpaper", "moescape"]
 
 REDDIT = praw.Reddit(
     user_agent="wall.py",
@@ -45,8 +46,6 @@ REDDIT = praw.Reddit(
     password=os.environ["REDDIT_PASSWORD"],
 )
 
-_SUBREDDIT = REDDIT.subreddit(SUBREDDIT)
-
 # where to store cached images
 _REAL_DIRECTORY = os.path.expanduser("~/Pictures/.wall/")
 _CACHE_DIRECTORY = os.path.expanduser("~/Pictures/.wall/_cache/")
@@ -54,12 +53,13 @@ _CACHE_DIRECTORY = os.path.expanduser("~/Pictures/.wall/_cache/")
 os.makedirs(_CACHE_DIRECTORY, exist_ok=True)
 os.makedirs(_REAL_DIRECTORY, exist_ok=True)
 
-# exits if the subreddit doesn't exist
-try:
-    REDDIT.subreddit(SUBREDDIT).id
-except Exception:
-    print("r/{} is not a valid subreddit".format(_SUBREDDIT))
-    sys.exit(1)
+# validate subreddits exist
+for subreddit_name in SUBREDDITS:
+    try:
+        REDDIT.subreddit(subreddit_name).id
+    except Exception:
+        print(f"r/{subreddit_name} is not a valid subreddit")
+        sys.exit(1)
 
 # print welcome message
 
@@ -73,14 +73,20 @@ wallpaper_script = wallpaper_script = (
 
 QUERY = ""
 
+# Fetch posts from all subreddits
+_POSTS = []
+for subreddit_name in SUBREDDITS:
+    subreddit = REDDIT.subreddit(subreddit_name)
+    if QUERY:
+        _POSTS.extend(list(subreddit.search(query=QUERY, sort="hot", time_filter="year", limit=10)))
+    else:
+        _POSTS.extend(list(subreddit.hot(limit=10)))
 
-_POSTS = (
-    _SUBREDDIT.search(query=QUERY, sort="hot", time_filter="year")
-    if QUERY
-    else _SUBREDDIT.hot(limit=15)
-)
+# Randomize the order of posts
+random.shuffle(_POSTS)
 
 images_to_display = []
+all_posts_data = []  # Store all post data for "Load More" functionality
 
 
 def resolve_url(post):
@@ -323,7 +329,10 @@ for post_index, post in enumerate(_POSTS):
         if any(s in post.title for s in _BLACKLIST):
             continue
 
-        images_to_display.append((item_id, post, preview, url, filename, ext))
+        all_posts_data.append((item_id, post, preview, url, filename, ext))
+
+# Initially show all images
+images_to_display = all_posts_data.copy()
 
 
 async def download_image(url, filename, ext):
@@ -351,6 +360,8 @@ def load_and_display_images():
     # Remove loading indicator
     if dpg.does_item_exist("loading_text"):
         dpg.delete_item("loading_text")
+    if dpg.does_item_exist("loading_indicator"):
+        dpg.delete_item("loading_indicator")
     
     # Display images in rows with 3 columns each
     for i in range(0, len(images_to_display), 3):
@@ -396,14 +407,131 @@ def load_and_display_images():
                                         user_data=(filename, ext, url, post),
                                         width=150,
                                     )
-                                    dpg.add_button(
-                                        label="Set as Dual Monitor",
-                                        callback=create_dual_monitor_wallpaper,
-                                        user_data=(filename, ext, url, post),
-                                        width=150,
-                                    )
+                                    # Only show dual monitor button on non-macOS systems
+                                    if platform.system() != "Darwin":
+                                        dpg.add_button(
+                                            label="Set as Dual Monitor",
+                                            callback=create_dual_monitor_wallpaper,
+                                            user_data=(filename, ext, url, post),
+                                            width=150,
+                                        )
                         except Exception as e:
                             dpg.add_text(f"Failed to load image: {e}")
+    
+    # Show Load More button
+    if dpg.does_item_exist("load_more_container"):
+        dpg.show_item("load_more_container")
+
+
+def load_more_images():
+    """Fetch and display more images from subreddits"""
+    dpg.hide_item("load_more_button")
+    dpg.show_item("load_more_loading")
+    
+    def fetch_more():
+        global _POSTS, all_posts_data, images_to_display
+        
+        # Fetch more posts from all subreddits
+        new_posts = []
+        for subreddit_name in SUBREDDITS:
+            subreddit = REDDIT.subreddit(subreddit_name)
+            if QUERY:
+                new_posts.extend(list(subreddit.search(query=QUERY, sort="hot", time_filter="year", limit=10)))
+            else:
+                # Get next batch of posts
+                existing_count = len([p for p in _POSTS if p.subreddit.display_name.lower() == subreddit_name.lower()])
+                new_posts.extend(list(subreddit.hot(limit=10 + existing_count))[existing_count:])
+        
+        # Randomize new posts
+        random.shuffle(new_posts)
+        _POSTS.extend(new_posts)
+        
+        # Process new posts
+        new_images = []
+        for post in new_posts:
+            if post.score < _MIN_VOTES:
+                continue
+            
+            data = resolve_url(post)
+            for i, obj in enumerate(data):
+                [item_id, url, preview] = obj.values()
+                path = urllib.parse.urlparse(url).path
+                ext = os.path.splitext(path)[1]
+                filename = os.path.join(_REAL_DIRECTORY, item_id)
+                
+                if any(s in post.title for s in _BLACKLIST):
+                    continue
+                
+                new_images.append((item_id, post, preview, url, filename, ext))
+        
+        all_posts_data.extend(new_images)
+        images_to_display.extend(new_images)
+        
+        # Download new images
+        async def download_new_images():
+            tasks = []
+            for item_id, post, preview, url, filename, ext in new_images:
+                cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
+                task = asyncio.create_task(download_image(preview, cached_filename, ext))
+                tasks.append(task)
+            await asyncio.gather(*tasks)
+        
+        asyncio.run(download_new_images())
+        
+        # Display new images
+        start_index = len(images_to_display) - len(new_images)
+        for i in range(start_index, len(images_to_display), 3):
+            with dpg.table_row(parent="image_table"):
+                for j in range(3):
+                    if i + j < len(images_to_display):
+                        item_id, post, preview, url, filename, ext = images_to_display[i + j]
+                        cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
+                        
+                        with dpg.table_cell():
+                            try:
+                                width, height, _, data = dpg.load_image(cached_filename + ext)
+                                preview_width = 300
+                                aspect_ratio = height / width
+                                preview_height = int(preview_width * aspect_ratio)
+                                
+                                with dpg.texture_registry():
+                                    dpg.add_static_texture(
+                                        width=width,
+                                        height=height,
+                                        default_value=data,
+                                        tag=item_id,
+                                    )
+                                
+                                with dpg.group():
+                                    dpg.add_image(
+                                        texture_tag=item_id,
+                                        width=preview_width,
+                                        height=preview_height,
+                                    )
+                                    with dpg.group(horizontal=True):
+                                        dpg.add_button(
+                                            label="Set as Wallpaper",
+                                            callback=process_image,
+                                            user_data=(filename, ext, url, post),
+                                            width=150,
+                                        )
+                                        if platform.system() != "Darwin":
+                                            dpg.add_button(
+                                                label="Set as Dual Monitor",
+                                                callback=create_dual_monitor_wallpaper,
+                                                user_data=(filename, ext, url, post),
+                                                width=150,
+                                            )
+                            except Exception as e:
+                                dpg.add_text(f"Failed to load image: {e}")
+        
+        # Show button again
+        dpg.hide_item("load_more_loading")
+        dpg.show_item("load_more_button")
+    
+    # Run in background thread
+    thread = threading.Thread(target=fetch_more, daemon=True)
+    thread.start()
 
 
 def download_images_thread():
@@ -432,6 +560,24 @@ with dpg.window(tag="wall.py"):
         dpg.add_table_column()
         dpg.add_table_column()
         dpg.add_table_column()
+    
+    # Load More button container (hidden initially)
+    with dpg.group(tag="load_more_container", show=False):
+        dpg.add_spacer(height=20)
+        with dpg.group(horizontal=True):
+            dpg.add_spacer(width=350)
+            dpg.add_button(
+                label="Load More Wallpapers",
+                callback=load_more_images,
+                tag="load_more_button",
+                width=200,
+                height=40,
+            )
+            dpg.add_loading_indicator(
+                style=1,
+                tag="load_more_loading",
+                show=False,
+            )
 
 
 dpg.create_viewport(title="wall.py")
