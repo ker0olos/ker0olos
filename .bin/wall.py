@@ -1,25 +1,40 @@
 #!/usr/bin/python3
 
+import asyncio
 import os
-import sys
-import urllib
 import platform
 import subprocess
+import sys
+import urllib
+import urllib.request
 
+import aiohttp
+import dearpygui.dearpygui as dpg
 import praw
+from dotenv import load_dotenv
 from PIL import Image, ImageFilter
 
-_MIN_VOTES = 50
+load_dotenv()
+
+dpg.create_context()
+
+
+_MIN_VOTES = 2
 _MIN_WIDTH = 2560
 _MIN_HEIGHT = 1440
+
+# Portrait monitor dimensions
+_PORTRAIT_WIDTH = 1080
+_PORTRAIT_HEIGHT = 1920
+
+# Dual monitor combined dimensions
+_DUAL_WIDTH = _PORTRAIT_WIDTH + _MIN_WIDTH
+_DUAL_HEIGHT = max(_PORTRAIT_HEIGHT, _MIN_HEIGHT)
 
 _BLACKLIST = ["Naruto", "Evangelion", "Bunny"]
 
 # default subreddit
 SUBREDDIT = "Animewallpaper"
-
-# search query
-QUERY = ""
 
 REDDIT = praw.Reddit(
     user_agent="wall.py",
@@ -29,16 +44,14 @@ REDDIT = praw.Reddit(
     password=os.environ["REDDIT_PASSWORD"],
 )
 
-# check if a subreddit and/or a search query are specified
-try:
-    QUERY = sys.argv[1] if sys.argv[1] != "-l" else None
-except Exception:
-    pass
-
 _SUBREDDIT = REDDIT.subreddit(SUBREDDIT)
 
 # where to store cached images
-_CACHE_DIRECTORY = os.path.expanduser("~/Pictures/.wall/")
+_REAL_DIRECTORY = os.path.expanduser("~/Pictures/.wall/")
+_CACHE_DIRECTORY = os.path.expanduser("~/Pictures/.wall/_cache/")
+
+os.makedirs(_CACHE_DIRECTORY, exist_ok=True)
+os.makedirs(_REAL_DIRECTORY, exist_ok=True)
 
 # exits if the subreddit doesn't exist
 try:
@@ -49,69 +62,180 @@ except Exception:
 
 # print welcome message
 
-print("\n--------------------------------------------")
-print(("r/{} ~ {}" if QUERY else "r/{}").format(SUBREDDIT, QUERY))
-print("--------------------------------------------\n")
-
 
 wallpaper_script = wallpaper_script = (
-    ["powershell.exe", "-File", "C:\\Users\\kerol\\Documents\\.bin\\wall.ps1"] if platform.system() == "Windows" else ["wall.sh"]
+    ["powershell.exe", "-File", "C:\\Users\\kerol\\Documents\\.bin\\wall.ps1"]
+    if platform.system() == "Windows"
+    else ["wall.sh"]
 )
+
+
+QUERY = ""
+
+
+_POSTS = (
+    _SUBREDDIT.search(query=QUERY, sort="hot", time_filter="year")
+    if QUERY
+    else _SUBREDDIT.hot(limit=15)
+)
+
+images_to_display = []
 
 
 def resolve_url(post):
     try:
         urls = []
-        for media_id in post.media_metadata:
-            urls.append(dict(id=media_id, url=post.media_metadata[media_id]["s"]["u"]))
+        for [index, media_id] in enumerate(post.media_metadata):
+            urls.append(
+                dict(
+                    id=media_id,
+                    url=post.media_metadata[media_id]["s"]["u"],
+                    preview=post.preview["images"][index]["source"]["url"],
+                )
+            )
         return urls
     except Exception:
         if post.url.startswith("https://i.redd.it/") or post.url.startswith(
             "https://i.imgur.com/"
         ):
-            return [dict(id=post.id, url=post.url)]
+            return [
+                dict(
+                    id=post.id,
+                    url=post.url,
+                    preview=post.preview["images"][0]["source"]["url"],
+                )
+            ]
         else:
             return []
 
 
-def process_image(title, length, index, filename, ext, url):
-    if not os.path.isfile(filename + ext):
-        urllib.request.urlretrieve(url, filename + ext)
-
-    print("\n" + title + "\n")
-
-    CHOICES = "(f)orward"
-
-    if index > 0:
-        CHOICES += "/(p)revious"
-
-    if length > 1:
-        CHOICES += "/(s)skip"
-
-    CHOICES += "/(q)uit"
-
-    # notify user about how many images are left in the collection
-    if length > 1:
-        print(" {} left in this collection.".format(length))
-
+def process_image(sender, app_data, user_data):
+    filename, ext, url, post = user_data
+    urllib.request.urlretrieve(url, filename + ext)
     with Image.open(filename + ext) as img:
-        # image is in portrait
-        if img.size[0] < img.size[1]:
-            if "-l" not in sys.argv:
-                resize_image(img, filename)
-                subprocess.Popen(
-                    wallpaper_script + [
-                        filename + "_landscape.png",
-                        filename + ext,
-                    ]
-                )
-                return input(f"Do you want to keep going? {CHOICES}: ")
-            else:
-                return "f"
-        # image is in landscape
+        resize_image(img, filename)
+        if platform.system() == "Windows":
+            # Use ctypes to set the wallpaper on Windows
+            import ctypes
+
+            SPI_SETDESKWALLPAPER = 0x0014
+            SPIF_UPDATEINIFILE = 0x01
+            SPIF_SENDCHANGE = 0x02
+            ctypes.windll.user32.SystemParametersInfoW(
+                SPI_SETDESKWALLPAPER,
+                0,
+                filename + "_landscape.png",
+                SPIF_UPDATEINIFILE | SPIF_SENDCHANGE,
+            )
         else:
-            subprocess.Popen(wallpaper_script + (filename + ext))
-            return input(f"Do you want to keep going? {CHOICES}: ")
+            subprocess.Popen(
+                wallpaper_script
+                + [
+                    filename + "_landscape.png",
+                    filename + ext,
+                ]
+            )
+
+    post.upvote()
+
+
+def create_dual_monitor_wallpaper(sender, app_data, user_data):
+    filename, ext, url, post = user_data
+    urllib.request.urlretrieve(url, filename + ext)
+    with Image.open(filename + ext) as img:
+        # Create dual monitor wallpaper - side by side, bottom-aligned
+        dual_wallpaper = Image.new(
+            "RGBA",
+            (_PORTRAIT_WIDTH + _MIN_WIDTH, max(_PORTRAIT_HEIGHT, _MIN_HEIGHT)),
+            (0, 0, 0, 255),
+        )
+
+        # Create a zoomed and cropped image for portrait monitor (left)
+        # Calculate the crop dimensions based on aspect ratio
+        img_aspect = img.width / img.height
+        port_aspect = _PORTRAIT_WIDTH / _PORTRAIT_HEIGHT
+
+        if img_aspect > port_aspect:  # Image is wider than portrait monitor
+            # Calculate the width needed to maintain height while matching portrait aspect ratio
+            target_width = int(_PORTRAIT_HEIGHT * img_aspect)
+            # Resize image to target height while maintaining aspect ratio
+            port_img = img.resize(
+                (target_width, _PORTRAIT_HEIGHT),
+                resample=Image.Resampling.LANCZOS,
+            )
+            # Crop the center portion to match portrait width
+            left_margin = (target_width - _PORTRAIT_WIDTH) // 2
+            port_bg = port_img.crop(
+                (left_margin, 0, left_margin + _PORTRAIT_WIDTH, _PORTRAIT_HEIGHT)
+            )
+        else:  # Image is taller than portrait monitor
+            # Calculate the height needed to maintain width while matching portrait aspect ratio
+            target_height = int(_PORTRAIT_WIDTH / img_aspect)
+            # Resize image to target width while maintaining aspect ratio
+            port_img = img.resize(
+                (_PORTRAIT_WIDTH, target_height),
+                resample=Image.Resampling.LANCZOS,
+            )
+            # Crop the center portion to match portrait height
+            top_margin = (target_height - _PORTRAIT_HEIGHT) // 2
+            port_bg = port_img.crop(
+                (0, top_margin, _PORTRAIT_WIDTH, top_margin + _PORTRAIT_HEIGHT)
+            )
+
+        port_bg = port_bg.convert("RGBA")
+
+        # Create landscape image for second monitor (right)
+        landscape_ratio = _MIN_HEIGHT / img.size[1]
+        landscape_size = (int(img.size[0] * landscape_ratio), _MIN_HEIGHT)
+        landscape_img = img.resize(
+            size=landscape_size, resample=Image.Resampling.LANCZOS
+        )
+
+        # Create landscape background for landscape monitor
+        land_bg = img.resize(
+            size=(_MIN_WIDTH, _MIN_HEIGHT), resample=Image.Resampling.LANCZOS
+        )
+        land_bg = land_bg.convert("RGBA")
+        land_bg = land_bg.filter(ImageFilter.GaussianBlur(radius=25))
+        land_bg.paste(
+            landscape_img, box=(int((_MIN_WIDTH - landscape_size[0]) * 0.5), 0)
+        )
+
+        # Calculate vertical offset to bottom-align the monitors
+        # Portrait monitor is taller, so landscape needs to be positioned with an offset
+        vertical_offset = _PORTRAIT_HEIGHT - _MIN_HEIGHT
+
+        # Combine the two images side by side, bottom-aligned
+        dual_wallpaper.paste(port_bg, (0, 0))  # Portrait at left
+        dual_wallpaper.paste(
+            land_bg, (_PORTRAIT_WIDTH, vertical_offset)
+        )  # Landscape at right, bottom-aligned
+
+        # Save the dual monitor wallpaper
+        dual_wallpaper.save(fp=filename + "_dual.png", format="png")
+
+        if platform.system() == "Windows":
+            import ctypes
+
+            SPI_SETDESKWALLPAPER = 0x0014
+            SPIF_UPDATEINIFILE = 0x01
+            SPIF_SENDCHANGE = 0x02
+            ctypes.windll.user32.SystemParametersInfoW(
+                SPI_SETDESKWALLPAPER,
+                0,
+                filename + "_dual.png",
+                SPIF_UPDATEINIFILE | SPIF_SENDCHANGE,
+            )
+        else:
+            subprocess.Popen(
+                wallpaper_script
+                + [
+                    filename + "_dual.png",
+                    filename + ext,
+                ]
+            )
+
+    post.upvote()
 
 
 def resize_image(img, filename):
@@ -141,80 +265,120 @@ def resize_image(img, filename):
     background_copy.save(fp=filename + "_landscape.png", format="png")
 
 
-INDEX = 0
-
-HISTORY = []
-
-
-_POSTS = (
-    _SUBREDDIT.search(query=QUERY, sort="hot", time_filter="year")
-    if QUERY
-    else _SUBREDDIT.hot(limit=20)
-)
-
 for post_index, post in enumerate(_POSTS):
     # skip posts with unconvincing number of up votes
     if post.score < _MIN_VOTES:
-        # print('  - {} is not enough up votes.'.format(post.score))
         continue
 
     # resolve all the urls in the post
-    # returns a list of ids and urls
     data = resolve_url(post)
 
     for i, obj in enumerate(data):
-        [item_id, url] = obj.values()
+        [item_id, url, preview] = obj.values()
 
         path = urllib.parse.urlparse(url).path
         ext = os.path.splitext(path)[1]
 
-        filename = os.path.join(_CACHE_DIRECTORY, item_id)
+        filename = os.path.join(_REAL_DIRECTORY, item_id)
 
         # skip blacklisted terms
         if any(s in post.title for s in _BLACKLIST):
             continue
 
-        # skip used images
-        if os.path.isfile(filename + ext):
-            # print('  - already used before')
-            continue
+        images_to_display.append((item_id, post, preview, url, filename, ext))
 
-        user_input = process_image(
-            post.title, len(data) - 1 - i, INDEX, filename, ext, url
-        )
+        async def download_image(url, filename, ext):
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    if resp.status == 200:
+                        with open(filename + ext, "wb") as f:
+                            f.write(await resp.read())
 
-        HISTORY.append((post.title, filename, ext))
+        async def main():
+            tasks = []
 
-        # skip the collection
-        if user_input.lower() == "s":
-            break
-
-        # quit the script
-        if user_input.lower() == "f":
-            INDEX += 1
-        # go back to the previous image
-        elif user_input.lower() == "p" and INDEX > 0:
-            INDEX -= 1
-
-            while INDEX < len(HISTORY):
-                user_input = process_image(
-                    HISTORY[INDEX][0],
-                    0,
-                    INDEX,
-                    HISTORY[INDEX][1],
-                    HISTORY[INDEX][2],
-                    None,
+            for i in images_to_display:
+                item_id, post, preview, url, filename, ext = i
+                # print(preview)
+                cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
+                task = asyncio.create_task(
+                    download_image(preview, cached_filename, ext)
                 )
+                tasks.append(task)
 
-                if user_input.lower() == "f":
-                    INDEX += 1
-                elif user_input.lower() == "p" and INDEX > 0:
-                    INDEX -= 1
-                else:
-                    print(url)
-                    post.upvote()
-                    sys.exit()
-        else:
-            print(url)
-            post.upvote()
-            sys.exit()
+            await asyncio.gather(*tasks)
+
+        asyncio.run(main())
+
+
+with dpg.window(tag="wall.py"):
+    # Create a table with 3 columns for the grid layout
+    with dpg.table(
+        header_row=False,
+        borders_innerH=False,
+        borders_outerH=False,
+        borders_innerV=False,
+        borders_outerV=False,
+        policy=dpg.mvTable_SizingFixedFit,
+    ):
+        # Define 3 columns with equal width
+        dpg.add_table_column()
+        dpg.add_table_column()
+        dpg.add_table_column()
+
+        # Display images in rows with 3 columns each
+        for i in range(0, len(images_to_display), 3):
+            with dpg.table_row():
+                # Add up to 3 images in this row
+                for j in range(3):
+                    if i + j < len(images_to_display):
+                        item_id, post, preview, url, filename, ext = images_to_display[
+                            i + j
+                        ]
+
+                        cached_filename = os.path.join(_CACHE_DIRECTORY, item_id)
+
+                        with dpg.table_cell():
+                            # Load and display image
+                            width, height, _, data = dpg.load_image(
+                                cached_filename + ext
+                            )
+
+                            preview_width = 300
+                            aspect_ratio = height / width
+                            preview_height = int(preview_width * aspect_ratio)
+
+                            with dpg.texture_registry():
+                                dpg.add_static_texture(
+                                    width=width,
+                                    height=height,
+                                    default_value=data,
+                                    tag=item_id,
+                                )
+
+                            with dpg.group():
+                                dpg.add_image(
+                                    texture_tag=item_id,
+                                    width=preview_width,
+                                    height=preview_height,
+                                )
+                                with dpg.group(horizontal=True):
+                                    dpg.add_button(
+                                        label="Set as Wallpaper",
+                                        callback=process_image,
+                                        user_data=(filename, ext, url, post),
+                                        width=150,
+                                    )
+                                    dpg.add_button(
+                                        label="Set as Dual Monitor",
+                                        callback=create_dual_monitor_wallpaper,
+                                        user_data=(filename, ext, url, post),
+                                        width=150,
+                                    )
+
+dpg.create_viewport(title="wall.py")
+dpg.setup_dearpygui()
+dpg.show_viewport()
+dpg.set_primary_window("wall.py", True)
+dpg.start_dearpygui()
+dpg.destroy_context()
