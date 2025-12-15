@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/Users/ker0olos/bin/venv/bin/python3
 
 import asyncio
 import os
@@ -114,6 +114,8 @@ def process_image(sender, app_data, user_data):
     urllib.request.urlretrieve(url, filename + ext)
     with Image.open(filename + ext) as img:
         resize_image(img, filename)
+        wallpaper_path = filename + "_landscape.png"
+        
         if platform.system() == "Windows":
             # Use ctypes to set the wallpaper on Windows
             import ctypes
@@ -124,14 +126,31 @@ def process_image(sender, app_data, user_data):
             ctypes.windll.user32.SystemParametersInfoW(
                 SPI_SETDESKWALLPAPER,
                 0,
-                filename + "_landscape.png",
+                wallpaper_path,
                 SPIF_UPDATEINIFILE | SPIF_SENDCHANGE,
             )
+        elif platform.system() == "Darwin":
+            # macOS - set wallpaper (macOS will use last saved scaling preference)
+            applescript = f'''
+            tell application "System Events"
+                tell every desktop
+                    set picture to "{wallpaper_path}"
+                end tell
+            end tell
+            '''
+            subprocess.run(["osascript", "-e", applescript])
+            # Then set to fill screen mode using a separate command
+            subprocess.run([
+                "osascript", "-e",
+                'tell application "System Events" to set picture rotation of current desktop to 0'
+            ])
         else:
+            # Linux - use the shell script
             subprocess.Popen(
                 wallpaper_script
                 + [
-                    filename + "_landscape.png",
+                    "-u",
+                    wallpaper_path,
                     filename + ext,
                 ]
             )
@@ -212,7 +231,8 @@ def create_dual_monitor_wallpaper(sender, app_data, user_data):
         )  # Landscape at right, bottom-aligned
 
         # Save the dual monitor wallpaper
-        dual_wallpaper.save(fp=filename + "_dual.png", format="png")
+        dual_wallpaper_path = filename + "_dual.png"
+        dual_wallpaper.save(fp=dual_wallpaper_path, format="png")
 
         if platform.system() == "Windows":
             import ctypes
@@ -223,14 +243,31 @@ def create_dual_monitor_wallpaper(sender, app_data, user_data):
             ctypes.windll.user32.SystemParametersInfoW(
                 SPI_SETDESKWALLPAPER,
                 0,
-                filename + "_dual.png",
+                dual_wallpaper_path,
                 SPIF_UPDATEINIFILE | SPIF_SENDCHANGE,
             )
+        elif platform.system() == "Darwin":
+            # macOS - set wallpaper (macOS will use last saved scaling preference)
+            applescript = f'''
+            tell application "System Events"
+                tell every desktop
+                    set picture to "{dual_wallpaper_path}"
+                end tell
+            end tell
+            '''
+            subprocess.run(["osascript", "-e", applescript])
+            # Then set to fill screen mode using a separate command
+            subprocess.run([
+                "osascript", "-e",
+                'tell application "System Events" to set picture rotation of current desktop to 0'
+            ])
         else:
+            # Linux - use the shell script
             subprocess.Popen(
                 wallpaper_script
                 + [
-                    filename + "_dual.png",
+                    "-u",
+                    dual_wallpaper_path,
                     filename + ext,
                 ]
             )
