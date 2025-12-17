@@ -1,4 +1,4 @@
-#!/Users/ker0olos/bin/venv/bin/python3
+#!/usr/bin/env python3
 
 import asyncio
 import os
@@ -105,13 +105,16 @@ def resolve_url(post):
         if post.url.startswith("https://i.redd.it/") or post.url.startswith(
             "https://i.imgur.com/"
         ):
-            return [
-                dict(
-                    id=post.id,
-                    url=post.url,
-                    preview=post.preview["images"][0]["source"]["url"],
-                )
-            ]
+            try:
+                return [
+                    dict(
+                        id=post.id,
+                        url=post.url,
+                        preview=post.preview["images"][0]["source"]["url"],
+                    )
+                ]
+            except Exception:
+                return []
         else:
             return []
 
@@ -336,11 +339,16 @@ images_to_display = all_posts_data.copy()
 
 
 async def download_image(url, filename, ext):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
-            if resp.status == 200:
-                with open(filename + ext, "wb") as f:
-                    f.write(await resp.read())
+    try:
+        # Unescape HTML entities in URL
+        url = url.replace('&amp;', '&')
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status == 200:
+                    with open(filename + ext, "wb") as f:
+                        f.write(await resp.read())
+    except Exception:
+        pass
 
 
 async def download_all_images():
@@ -363,6 +371,9 @@ def load_and_display_images():
     if dpg.does_item_exist("loading_indicator"):
         dpg.delete_item("loading_indicator")
     
+    # Show the scrollable window
+    dpg.show_item("scroll_window")
+    
     # Display images in rows with 3 columns each
     for i in range(0, len(images_to_display), 3):
         with dpg.table_row(parent="image_table"):
@@ -377,6 +388,11 @@ def load_and_display_images():
 
                     with dpg.table_cell():
                         try:
+                            # Check if file exists
+                            if not os.path.exists(cached_filename + ext):
+                                dpg.add_text(f"File not found: {item_id}")
+                                continue
+                                
                             # Load and display image
                             width, height, _, data = dpg.load_image(
                                 cached_filename + ext
@@ -476,6 +492,9 @@ def load_more_images():
                 tasks.append(task)
             await asyncio.gather(*tasks)
         
+        # Windows fix: Set event loop policy for asyncio in threads
+        if platform.system() == "Windows":
+            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
         asyncio.run(download_new_images())
         
         # Display new images
@@ -536,51 +555,56 @@ def load_more_images():
 
 def download_images_thread():
     """Run async download in a separate thread"""
+    # Windows fix: Set event loop policy for asyncio in threads
+    if platform.system() == "Windows":
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     asyncio.run(download_all_images())
     # After download completes, update UI in main thread
     load_and_display_images()
 
 
 # Create UI window with loading state
-with dpg.window(tag="wall.py"):
+with dpg.window(tag="wall.py", width=1000, height=800):
     dpg.add_text("Loading wallpapers...", tag="loading_text")
     dpg.add_loading_indicator(style=1, tag="loading_indicator")
     
-    # Create a table with 3 columns for the grid layout
-    with dpg.table(
-        tag="image_table",
-        header_row=False,
-        borders_innerH=False,
-        borders_outerH=False,
-        borders_innerV=False,
-        borders_outerV=False,
-        policy=dpg.mvTable_SizingFixedFit,
-    ):
-        # Define 3 columns with equal width
-        dpg.add_table_column()
-        dpg.add_table_column()
-        dpg.add_table_column()
+    # Create a child window to enable scrolling
+    with dpg.child_window(tag="scroll_window", width=-1, height=-1, show=False):
+        # Create a table with 3 columns for the grid layout
+        with dpg.table(
+            tag="image_table",
+            header_row=False,
+            borders_innerH=False,
+            borders_outerH=False,
+            borders_innerV=False,
+            borders_outerV=False,
+            policy=dpg.mvTable_SizingFixedFit,
+        ):
+            # Define 3 columns with equal width
+            dpg.add_table_column()
+            dpg.add_table_column()
+            dpg.add_table_column()
     
-    # Load More button container (hidden initially)
-    with dpg.group(tag="load_more_container", show=False):
-        dpg.add_spacer(height=20)
-        with dpg.group(horizontal=True):
-            dpg.add_spacer(width=350)
-            dpg.add_button(
-                label="Load More Wallpapers",
-                callback=load_more_images,
-                tag="load_more_button",
-                width=200,
-                height=40,
-            )
-            dpg.add_loading_indicator(
-                style=1,
-                tag="load_more_loading",
-                show=False,
-            )
+        # Load More button container (hidden initially)
+        with dpg.group(tag="load_more_container", show=False):
+            dpg.add_spacer(height=20)
+            with dpg.group(horizontal=True):
+                dpg.add_spacer(width=350)
+                dpg.add_button(
+                    label="Load More Wallpapers",
+                    callback=load_more_images,
+                    tag="load_more_button",
+                    width=200,
+                    height=40,
+                )
+                dpg.add_loading_indicator(
+                    style=1,
+                    tag="load_more_loading",
+                    show=False,
+                )
 
 
-dpg.create_viewport(title="wall.py")
+dpg.create_viewport(title="wall.py", width=1024, height=768)
 dpg.setup_dearpygui()
 dpg.show_viewport()
 dpg.set_primary_window("wall.py", True)
