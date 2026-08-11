@@ -1,3 +1,3 @@
-![A Screenshot of a Linux Desktop](https://github.com/ker0olos/ker0olos/raw/main/2021-06-24-225815_1366x768_scrot.png)
+![A Screenshot of a MacOS Desktop](https://github.com/user-attachments/assets/e45137ba-bb11-4f0f-b426-e887281b651f)
 
 <h6 align="center"><i>(Send dots.)</i></h6>
